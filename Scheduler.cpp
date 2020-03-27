@@ -33,6 +33,7 @@ void Scheduler::schedule_next( std::vector<Task *> &pending, std::vector<Task *>
 		running = std::move( ready[0] );
 		ready.erase( ready.begin() );
 	}
+	printf( "task %d is running!\n", running->id );
 }
 
 void Scheduler::set_start( Task *&task, double time )

@@ -31,7 +31,7 @@ void Simulator::run()
 				it++;
 			}
 		}
-		
+
 		if( !ready.empty() ) {
 			printf( "scheduling tasks : " );
 			for( auto & element : ready ) {
@@ -57,11 +57,11 @@ void Simulator::run()
 	}
 }
 
-void Simulator::update_params( std::vector<Task *> tasks, double time )
+void Simulator::update_params( std::vector<Task *> &tasks, double time )
 {
 	for( auto & element : tasks ) {
 		element->update_tardiness( time );
-		//element->set_arrival_time();
+		element->set_arrival_time();
 		element->set_abs_dd();
 	}
 }

@@ -16,7 +16,7 @@ public:
 	}
 	void run();
 	void initialize();
-	void update_params( std::vector<Task *> tasks, double time );
+	void update_params( std::vector<Task *> &tasks, double time );
 private:
 	std::vector<Task *> pending;
 	std::vector<Task *> ready;
