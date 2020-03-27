@@ -3,7 +3,7 @@
 
 void Simulator::initialize()
 {
-	TaskCreator *tc = new TaskCreator( 3 );
+	TaskCreator *tc = new TaskCreator( 2 );
 	tc->create_test_set( pending );
 	for( auto & element : pending ) {
 		element->arrival_time = element->phase;
@@ -18,14 +18,20 @@ void Simulator::run()
 	while( abs_time < finish_time ) {
 		printf( "time: %f\n", abs_time );
 		int i=0;
-		for( std::vector<Task *>::iterator it = pending.begin(); it != pending.end(); it++, i++ ) {
+		std::vector<Task *>::iterator it = pending.begin();
+
+		while( it != pending.end() ) {
 			if ( (*it)->isReady( abs_time ) ) {
 				(*it)->inc_instance();
 				printf( "task %d is ready!\n", (*it)->id );
 				ready.push_back( std::move( *it ) );
-				pending.erase( it );
+				it = pending.erase( it );
+			}
+			else {
+				it++;
 			}
 		}
+		
 		if( !ready.empty() ) {
 			printf( "scheduling tasks : " );
 			for( auto & element : ready ) {
