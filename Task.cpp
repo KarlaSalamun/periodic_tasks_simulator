@@ -23,7 +23,6 @@ void Task::set_abs_dd()
 
 void Task::update_params()
 {
-	instance++;
 	arrival_time = phase + ( instance - 1 ) * period;
 	abs_due_date = phase + ( instance - 1 ) * period;
 }

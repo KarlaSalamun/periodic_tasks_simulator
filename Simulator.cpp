@@ -17,24 +17,8 @@ void Simulator::run()
 	Task *running = nullptr;				// TODO: ovo je leak
 	while( abs_time < finish_time ) {
 
-		printf( "time: %f\n", abs_time );
 		
-		if( running ) {
-			update_params( running, abs_time );
-			if( running->isFinished( abs_time ) ) {
-				printf( "task %d is finished!\n", running->id );
-				pending.push_back( std::move( running ) );
-				running = nullptr;
-			}
-		}
-		
-		for( auto & element : pending ) {
-			update_params( element, abs_time );
-		}
-		
-		for( auto & element : pending ) {
-			update_params( element, abs_time );
-		}
+
 
 
 		int i=0;
@@ -60,10 +44,12 @@ void Simulator::run()
 			}
 			printf( "\n" );
 			sched->schedule_next( pending, ready, running, abs_time );
-			update_params( running, abs_time ) ;
+			// update_params( running, abs_time ) ;
 		}
 		abs_time += time_slice;
 
+		printf( "time: %f\n", abs_time );
+/*
 		for( std::vector<Task *>::iterator it = ready.begin(); it != ready.end(); it++ ) {
 			if( (*it)->instance * (*it)->period < abs_time ) {
 				printf("missed task %d\n", (*it)->id);
@@ -71,8 +57,23 @@ void Simulator::run()
 				ready.erase( it );
 			}
 		}
-
-
+*/
+		if( running ) {
+			// update_params( running, abs_time );
+			if( running->isFinished( abs_time ) ) {
+				printf( "task %d is finished!\n", running->id );
+				pending.push_back( std::move( running ) );
+				running = nullptr;
+			}
+		}
+		
+		for( auto & element : pending ) {
+			update_params( element, abs_time );
+		}
+		
+		for( auto & element : pending ) {
+			update_params( element, abs_time );
+		}
 		
 
 	}
