@@ -14,14 +14,6 @@ void Scheduler::schedule_next( std::vector<Task *> &pending, std::vector<Task *>
 	std::sort( ready.begin(), ready.end(), customLess );
 
 	if( running ) {
-		if( running->isFinished( time ) ) {
-			printf( "task %d is finished\n", running->id );
-			delete running;
-			running = std::move( ready[0] );
-			ready.erase( ready.begin() );
-			set_start( running, time );
-			return;
-		}
 		if ( preempt( ready[0], running ) ) {
 			printf( "task %d is preempted\n", running->id );
 			running->set_remaining( time );

@@ -30,7 +30,7 @@ void Task::update_params()
 
 bool Task::isReady( double time ) 
 {
-	return isgreaterequal( time - arrival_time, 0 );
+	return fabs( time - arrival_time ) < 0.001;
 }
 
 bool Task::isFinished( double time ) 
