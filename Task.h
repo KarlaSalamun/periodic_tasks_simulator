@@ -21,6 +21,7 @@ class Task {
         double time_ended;
         double tardiness;
         double remaining;
+        bool isPreempted;
         double compute_tardiness();
         void update_tardiness( double time );
         void set_arrival_time();
@@ -35,6 +36,7 @@ class Task {
             phase( phase ), instance( instance ), period( period ), rel_due_date( rel_due_date )
         {
             tardiness = 0;
+            isPreempted = false;
         }
         Task() {}
         ~Task() {}

@@ -15,8 +15,10 @@ void Scheduler::schedule_next( std::vector<Task *> &pending, std::vector<Task *>
 
 	if( running ) {
 		if ( preempt( ready[0], running ) ) {
-			printf( "task %d is preempted\n", running->id );
+			printf( "task %d is preempted, ", running->id );
+			running->isPreempted = true;
 			running->set_remaining( time );
+			printf( "remaining time %f\n", running->remaining );
 			std::swap( ready[0], running );
 			set_start( running, time );
 		}
@@ -24,6 +26,7 @@ void Scheduler::schedule_next( std::vector<Task *> &pending, std::vector<Task *>
 	else {
 		running = std::move( ready[0] );
 		set_start( running, time );
+		// running->set_remaining( time );
 		ready.erase( ready.begin() );
 	}
 	

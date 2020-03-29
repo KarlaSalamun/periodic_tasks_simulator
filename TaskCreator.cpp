@@ -13,7 +13,7 @@ void TaskCreator::create_test_set( std::vector<Task *> &test_tasks )
     test_tasks.resize( task_number );
     for( int i=0; i<test_tasks.size(); i++ ) {
         test_tasks[i] = std::move( new Task() );
-        test_tasks[i]->phase = static_cast<double>( 1 + rand() % 3 ); // 1 to 10
+        test_tasks[i]->phase = static_cast<double>( 0.5 * (rand() % 2) + ( rand() % 3 ) ); // 1 to 10
         test_tasks[i]->period = static_cast<double>( 1 + rand() % 5 ); // 1 to 10
         test_tasks[i]->instance = 1;
         test_tasks[i]->duration = 0.5 * test_tasks[i]->period;

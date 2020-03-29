@@ -8,6 +8,7 @@ void Simulator::initialize()
 	tc->create_test_set( pending );
 	for( auto & element : pending ) {
 		element->arrival_time = element->phase;
+		element->set_abs_dd();
 		// printf( "%d: arrival %f\n", element->id, element->arrival_time );
 	}
 }

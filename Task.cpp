@@ -34,6 +34,12 @@ bool Task::isReady( double time )
 
 bool Task::isFinished( double time ) 
 {
+	if( isPreempted ) {
+		if( isgreaterequal( time, time_started + remaining ) ) {
+			isPreempted = false;
+			return true;
+		}
+	}
 	return isgreaterequal( time,  time_started + duration );
 }
 
