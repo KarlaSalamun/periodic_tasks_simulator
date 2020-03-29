@@ -5,7 +5,7 @@
 
 int main()
 {
-	Simulator *sim = new Simulator( 0.1, 5 );
+	Simulator *sim = new Simulator( 0.5, 7 );
 	sim->initialize();
 	sim->run();
 	return 0;

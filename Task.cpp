@@ -40,7 +40,7 @@ bool Task::isFinished( double time )
 void Task::update_tardiness( double time )
 {
 	if( time > abs_due_date ) {
-		tardiness += abs_due_date - time;
+		tardiness += time - abs_due_date;
 	}
 }
 

@@ -26,6 +26,7 @@ void Scheduler::schedule_next( std::vector<Task *> &pending, std::vector<Task *>
 		set_start( running, time );
 		ready.erase( ready.begin() );
 	}
+	
 	printf( "task %d is running!\n", running->id );
 }
 
