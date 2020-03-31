@@ -19,10 +19,6 @@ void Simulator::run()
 	Task *running = nullptr;				// TODO: ovo je leak
 	while( abs_time < finish_time ) {
 
-		
-
-
-
 		int i=0;
 		std::vector<Task *>::iterator it = pending.begin();
 

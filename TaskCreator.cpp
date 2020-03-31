@@ -4,6 +4,7 @@
 
 #include <random>
 #include <cstdio>
+#include <cassert>
 #include "TaskCreator.h"
 
 void TaskCreator::create_test_set( std::vector<Task *> &test_tasks )
@@ -37,16 +38,15 @@ void TaskCreator::write_tasks( std::vector<Task *>  &test_tasks )
 void TaskCreator::UUnifast_create_tasks( std::vector<Task *> &test_tasks )
 {
     FILE *fp = fopen( "task_set.txt", "w+" );
-    fprintf(fp, "id\tphase\tperiod\tdur\trel_due_date\n" );
+    fprintf(fp, "id\tphase\tutil\tperiod\tdur\trel_due_date\n" );
     test_tasks.resize( task_number );
 
     std::random_device rd;
     std::mt19937 e2(rd());
     std::uniform_real_distribution<> dist_dd(0.5, 1);
-    std::uniform_real_distribution<> dist_phase(0.5, 1);
 
     std::vector<double> u_values = UUnifast_generate_u( test_tasks.size(), 1 );
-    std::vector<double> T_values = generate_log_uniform( test_tasks.size(), 10000, 1, 10 );
+    std::vector<double> T_values = generate_log_uniform( test_tasks.size(), 10000, 1, 1 );
 
     for( int i=0; i<test_tasks.size(); i++ ) {
         test_tasks[i] = std::move( new Task );
@@ -54,12 +54,13 @@ void TaskCreator::UUnifast_create_tasks( std::vector<Task *> &test_tasks )
         // test_tasks[i]->phase = static_cast<double>( 0.5 * (rand() % 2) + ( rand() % 3 ) ); // 1 to 10
         test_tasks[i]->phase = 0;
         test_tasks[i]->instance = 1;
+        assert( u_values[i]!=0 );
         test_tasks[i]->duration = u_values[i] * test_tasks[i]->period;
-        test_tasks[i]->rel_due_date = test_tasks[i]->period * dist_dd(e2);
-        // test_tasks[i]->rel_due_date = test_tasks[i]->period;
+        // test_tasks[i]->rel_due_date = test_tasks[i]->period * dist_dd(e2);
+        test_tasks[i]->rel_due_date = test_tasks[i]->period;
         test_tasks[i]->id = i;
-        fprintf(fp, "%d\t%.2f\t%.2f\t%.2f\t%.2f\n", 
-            test_tasks[i]->id, test_tasks[i]->phase, test_tasks[i]->period, test_tasks[i]->duration, test_tasks[i]->rel_due_date );
+        fprintf(fp, "%d\t%.2f\t%.3f\t%.2f\t%.2f\t%.2f\n", 
+            test_tasks[i]->id, test_tasks[i]->phase, u_values[i], test_tasks[i]->period, test_tasks[i]->duration, test_tasks[i]->rel_due_date );
     }
     fclose(fp);
 }
@@ -72,10 +73,11 @@ std::vector<double> TaskCreator::UUnifast_generate_u( int n, double mean_u )
     std::uniform_real_distribution<> dist(0, 1);
     double sum_u = mean_u;
     
-    for( int i=0; i<n-2; i++ ) {
+    for( int i=0; i<n-1; i++ ) {
         // double exp = 
         double next_sum_u = sum_u * pow( dist( e2 ), static_cast<double>( 1. / ( n-i ) ) );
         result[i] = sum_u - next_sum_u;
+        assert( result[i]!=0 );
         sum_u = next_sum_u;
     }
 
@@ -93,7 +95,7 @@ std::vector<double> TaskCreator::generate_log_uniform( int n, double lim_u, doub
 
     for( int i=0; i<n; i++ ) {
         r_factor[i] = dist(e2);
-        result[i] = ceil( exp( r_factor[i] ) / granularity ) * granularity;
+        result[i] = floor( exp( r_factor[i] ) / granularity ) * granularity;
     }
     return result;
 }
