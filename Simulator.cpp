@@ -4,8 +4,8 @@
 
 void Simulator::initialize()
 {
-	TaskCreator *tc = new TaskCreator( 3 );
-	tc->create_test_set( pending );
+	TaskCreator *tc = new TaskCreator( 10 );
+	tc->UUnifast_create_tasks( pending );
 	for( auto & element : pending ) {
 		element->arrival_time = element->phase;
 		element->set_abs_dd();
@@ -106,7 +106,7 @@ void Simulator::run()
 		printf( "%d tardiness: %f\n", running->id, running->tardiness );	
 	}
 	
-
+	printf("missed tasks: %d\n", missed);
 }
 
 void Simulator::update_params( Task *&task, double time )
