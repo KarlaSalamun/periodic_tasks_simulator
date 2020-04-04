@@ -2,6 +2,7 @@
 // Created by karla on 06. 03. 2020..
 //
 #include <cmath>
+#include <cstdio>
 #include <math.h>
 #include "Task.h"
 
@@ -19,7 +20,7 @@ void Task::set_arrival_time()
 void Task::set_abs_dd()
 {
 	abs_due_date = phase + ( instance - 1 ) * period + rel_due_date;
-}
+} 
 
 void Task::update_params()
 {
@@ -34,13 +35,16 @@ bool Task::isReady( double time )
 
 bool Task::isFinished( double time ) 
 {
-	if( isPreempted ) {
-		if( isgreaterequal( time, time_started + remaining ) ) {
-			isPreempted = false;
-			return true;
-		}
-	}
-	return isgreaterequal( time,  time_started + duration );
+	// if( isPreempted ) {
+	// 	if( isgreaterequal( time+0.00001, time_started + remaining ) ) {
+	// 		isPreempted = false;
+	// 		return true;
+	// 	}
+	// }
+	// return isgreaterequal( time+0.00001,  time_started + duration );
+
+	//TODO: 0.1 je timeslice koristi varijablu
+	return islessequal( fabs(remaining), 0.1 );
 }
 
 void Task::update_tardiness( double time )
@@ -55,7 +59,13 @@ void Task::inc_instance()
 	instance++;
 }
 
+//TODO: izbrisati
 void Task::set_remaining( double time )
 {
 	remaining = time_started + duration - time;
+}
+
+void Task::update_remaining()
+{
+	remaining -= 0.1;			// TODO ovo je timeslice i primi kroz konstruktor!
 }

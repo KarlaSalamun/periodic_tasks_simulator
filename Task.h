@@ -8,6 +8,7 @@
 
 class Task {
     public:
+        //TODO: sve varijable trebaju biti private!
         double phase;
         int instance;
         int id;
@@ -31,7 +32,9 @@ class Task {
         bool isFinished( double time );
         void inc_instance();
         void set_remaining( double time );
+        void update_remaining();
 
+        //TODO: postavi duration = remaining kroz konstruktor
         Task( double phase, int instance, double period, double rel_due_date ) :
             phase( phase ), instance( instance ), period( period ), rel_due_date( rel_due_date )
         {
