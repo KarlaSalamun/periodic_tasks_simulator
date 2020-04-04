@@ -6,37 +6,46 @@
 #define TASKCREATOR_H
 
 #include <vector>
+#include <string>
 #include "Task.h"
 
 class TaskCreator {
     public:
-        TaskCreator( int task_number ) :
-            task_number( task_number ) {}
+        TaskCreator( int task_number, std::string filename ) :
+            task_number( task_number ), filename( filename ) {}
 
-        TaskCreator() {}
+        TaskCreator() = default;
 
         void set_task_number( int task_number )
         {
-            task_number = task_number;
+            this->task_number = task_number;
         }
+        // TODO ovo treba tek kad spojim repo sa statickim poslovima
         void set_dd_range( double dd_range )
         {
-            dd_range = dd_range;
+            this->dd_range = dd_range;
         }
         void set_dd_tightness( double dd_tightness )
         {
-            dd_tightness = dd_tightness;
+            this->dd_tightness = dd_tightness;
+        }
+        void set_time_slice( double time_slice )
+        {
+            this->time_slice = time_slice;
         }
 
-        void create_test_set( std::vector<Task *> &test_tasks );
+        virtual void create_test_set( std::vector<Task *> &test_tasks );
         void write_tasks( std::vector<Task *>  &test_tasks );
         void load_tasks( std::vector<Task *> &test_tasks );
-        void UUnifast_create_tasks( std::vector<Task *> &test_tasks );
-        std::vector<double> UUnifast_generate_u( int n, double mean_u );
-        std::vector<double> generate_log_uniform( int n, double lim_u, double lim_d, int granularity );
 
+    protected:
         int task_number;
+        double time_slice;
+        
+    private:
+        std::string filename;
+        double dd_range;
+        double dd_tightness;
 };
-
 
 #endif 

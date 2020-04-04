@@ -1,7 +1,7 @@
-CXXFLAGS = -Wall -g
-OBJECTS = Task.o main.o TaskCreator.o Simulator.o Scheduler.o
-SRC = Task.cpp main.cpp TaskCreator.cpp Simulator.cpp Scheduler.cpp
-INC = Task.h
+CXXFLAGS = -Wall -Wextra -g
+SRC = $(wildcard *.cpp)
+INC = $(wildcard *.h)
+OBJECTS = $(SRC:.cpp=.o)
 TARGET = simulator.elf
 
 $(TARGET): $(OBJECTS) 

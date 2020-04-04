@@ -8,43 +8,70 @@
 
 class Task {
     public:
-        //TODO: sve varijable trebaju biti private!
-        double phase;
-        int instance;
-        int id;
-        double period;
-        double arrival_time;
-        double duration;
-        double abs_due_date;
-        double rel_due_date;
-        double priority;
-        double time_started;
-        double time_ended;
-        double tardiness;
-        double remaining;
-        bool isPreempted;
-        double compute_tardiness();
+        double compute_tardiness( double time );
+
         void update_tardiness( double time );
+        void update_remaining();
+        void update_params();
+        void update_priority( double time );
+
+        bool isReady( double time );
+        bool isFinished();
+
+        void inc_instance();
+
         void set_arrival_time();
         void set_abs_dd();
-        void update_params();
-        bool isReady( double time );
-        bool isFinished( double time );
-        void inc_instance();
-        void set_remaining( double time );
-        void update_remaining();
+        void set_arrival_time( double arrival_time );
+        void set_priority( double priority );
+        void set_tardiness( double tard );
 
-        //TODO: postavi duration = remaining kroz konstruktor
-        Task( double phase, int instance, double period, double rel_due_date ) :
-            phase( phase ), instance( instance ), period( period ), rel_due_date( rel_due_date )
+        int get_id();
+        double get_phase();
+        double get_period();
+        double get_duration();
+        double get_abs_due_date();
+        double get_remaining();
+        double get_tardiness();
+        double get_priority() const;
+        int get_instance();
+
+        void initialize_task();
+
+        bool is_missed( double time );
+        bool is_next_instance( double time );
+
+        void write_task( FILE *fd );
+
+        Task( double phase, int instance, double period, double rel_due_date, int id, double time_slice, double duration ) :
+            phase( phase ), instance( instance ), period( period ), rel_due_date( rel_due_date ), 
+            id( id ), time_slice( time_slice ), duration( duration )
         {
+            remaining = duration;
             tardiness = 0;
             isPreempted = false;
         }
-        Task() {}
-        ~Task() {}
 
+        ~Task() = default;
+
+        bool isPreempted;
+
+    private:
+        double phase;
+        int instance;
+        double period;
+        double rel_due_date;
+        int id;
+        double time_slice;
+        double arrival_time;
+        double duration;
+        double abs_due_date;
+        double priority;
+        double tardiness;
+        double remaining;
 };
 
 
 #endif 
+
+
