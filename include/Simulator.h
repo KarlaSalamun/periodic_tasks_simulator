@@ -2,7 +2,6 @@
 #define SIMULATOR_H
 
 #include <cstdio>
-#include <Nodes/AbstractNode.h>
 
 #include "Task.h"
 #include "TaskCreator.h"
@@ -17,13 +16,6 @@ public:
 		abs_time = 0;
 		missed = 0;
 	}
-    Simulator( double time_slice, double finish_time, TaskCreator *tc, Scheduler *sched, AbstractNode *heuristic ) :
-            time_slice( time_slice ), finish_time( finish_time ), tc( tc ), sched( sched ), heuristic( heuristic )
-    {
-        tc->set_time_slice( time_slice );
-        abs_time = 0;
-        missed = 0;
-    }
 	double get_total_tardiness()
     {
 	    return total_tardiness;
@@ -41,7 +33,6 @@ private:
 	Scheduler *sched;
 	double abs_time;
 	int missed;
-	AbstractNode *heuristic;
 	double total_tardiness;
 
 	void initialize_tasks()
