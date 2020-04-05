@@ -20,15 +20,6 @@ class TaskCreator {
         {
             this->task_number = task_number;
         }
-        // TODO ovo treba tek kad spojim repo sa statickim poslovima
-        void set_dd_range( double dd_range )
-        {
-            this->dd_range = dd_range;
-        }
-        void set_dd_tightness( double dd_tightness )
-        {
-            this->dd_tightness = dd_tightness;
-        }
         void set_time_slice( double time_slice )
         {
             this->time_slice = time_slice;
@@ -44,8 +35,6 @@ class TaskCreator {
         
     private:
         std::string filename;
-        double dd_range;
-        double dd_tightness;
 };
 
 #endif 

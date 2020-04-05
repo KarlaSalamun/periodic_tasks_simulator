@@ -5,6 +5,8 @@
 #ifndef TASK_H
 #define TASK_H
 
+#include <cstdio>
+
 
 class Task {
     public:
@@ -25,6 +27,7 @@ class Task {
         void set_arrival_time( double arrival_time );
         void set_priority( double priority );
         void set_tardiness( double tard );
+        void set_time_started( double time );
 
         int get_id();
         double get_phase();
@@ -35,6 +38,8 @@ class Task {
         double get_tardiness();
         double get_priority() const;
         int get_instance();
+        double get_weight();
+        double get_time_started();
 
         void initialize_task();
 
@@ -43,6 +48,7 @@ class Task {
 
         void write_task( FILE *fd );
 
+        // this ctor is used for periodic tasks
         Task( double phase, int instance, double period, double rel_due_date, int id, double time_slice, double duration ) :
             phase( phase ), instance( instance ), period( period ), rel_due_date( rel_due_date ), 
             id( id ), time_slice( time_slice ), duration( duration )
@@ -51,6 +57,11 @@ class Task {
             tardiness = 0;
             isPreempted = false;
         }
+
+        // this ctor is used for static tasks
+        Task( double weight, double duration, double due_date ) : weight( weight ), duration( duration ), abs_due_date( due_date ) {}
+
+        Task() = default;
 
         ~Task() = default;
 
@@ -63,12 +74,14 @@ class Task {
         double rel_due_date;
         int id;
         double time_slice;
+        double weight;
         double arrival_time;
         double duration;
         double abs_due_date;
         double priority;
         double tardiness;
         double remaining;
+        double time_started;
 };
 
 

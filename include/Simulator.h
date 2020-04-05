@@ -2,6 +2,7 @@
 #define SIMULATOR_H
 
 #include <cstdio>
+#include <Nodes/AbstractNode.h>
 
 #include "Task.h"
 #include "TaskCreator.h"
@@ -9,7 +10,6 @@
 
 class Simulator {
 public:
-	//TODO: time_slice treba poslati dalje u task tako da zna napraviti update
 	Simulator( double time_slice, double finish_time, TaskCreator *tc, Scheduler *sched ) : 
 		time_slice( time_slice ), finish_time( finish_time ), tc( tc ), sched( sched )
 	{
@@ -17,6 +17,17 @@ public:
 		abs_time = 0;
 		missed = 0;
 	}
+    Simulator( double time_slice, double finish_time, TaskCreator *tc, Scheduler *sched, AbstractNode *heuristic ) :
+            time_slice( time_slice ), finish_time( finish_time ), tc( tc ), sched( sched ), heuristic( heuristic )
+    {
+        tc->set_time_slice( time_slice );
+        abs_time = 0;
+        missed = 0;
+    }
+	double get_total_tardiness()
+    {
+	    return total_tardiness;
+    }
 	void run();
 	void load();
 	void create();
@@ -30,6 +41,8 @@ private:
 	Scheduler *sched;
 	double abs_time;
 	int missed;
+	AbstractNode *heuristic;
+	double total_tardiness;
 
 	void initialize_tasks()
 	{

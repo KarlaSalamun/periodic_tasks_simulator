@@ -13,7 +13,7 @@ add_library(periodic_simulator STATIC
 	src/Simulator.cpp
 	src/Task.cpp
 	src/TaskCreator.cpp
-	src/UunifastCreator.cpp)
+	src/UunifastCreator.cpp include/StaticCreator.h src/StaticCreator.cpp)
 
 add_executable(periodic_test tests/main.cpp)
 target_link_libraries(periodic_test periodic_simulator)

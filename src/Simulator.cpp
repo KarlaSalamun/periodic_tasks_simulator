@@ -86,14 +86,17 @@ void Simulator::run()
 		}
 	}
 
-	for( auto & element : pending ){
-		printf( "%d tardiness: %f\n", element->get_id(), element->get_tardiness() );
+	for( auto & element : pending ) {
+//		printf( "%d tardiness: %f\n", element->get_id(), element->get_tardiness() );
+		total_tardiness += element->get_tardiness();
 	}
-	for( auto & element : ready ){
-		printf( "%d tardiness: %f\n", element->get_id(), element->get_tardiness() );
+	for( auto & element : ready ) {
+//		printf( "%d tardiness: %f\n", element->get_id(), element->get_tardiness() );
+        total_tardiness += element->get_tardiness();
 	}
 	if( running ) {
-		printf( "%d tardiness: %f\n", running->get_id(), running->get_tardiness() );	
+//		printf( "%d tardiness: %f\n", running->get_id(), running->get_tardiness() );
+        total_tardiness += running->get_tardiness();
 	}
 	
 	printf("missed tasks: %d\n", missed);

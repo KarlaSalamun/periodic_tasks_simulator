@@ -90,6 +90,11 @@ void Task::set_tardiness( double tard )
 	this->tardiness = tard;
 }
 
+void Task::set_time_started(double time)
+{
+    this->time_started = time;
+}
+
 // TODO staviti sve gettere const
 int Task::get_id()
 {
@@ -134,6 +139,16 @@ double Task::get_priority() const
 int Task::get_instance()
 {
 	return this->instance;
+}
+
+double Task::get_weight()
+{
+    return this->weight;
+}
+
+double Task::get_time_started()
+{
+    return this->time_started;
 }
 
 void Task::initialize_task() 
