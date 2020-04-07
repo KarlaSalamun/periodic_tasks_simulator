@@ -11,7 +11,11 @@ void UunifastCreator::create_test_set( std::vector<Task *> &test_tasks )
     for( size_t i=0; i<test_tasks.size(); i++ ) {
     	double period = T_values[i];
     	double phase = 0;
-    	double duration = u_values[i] * T_values[i];
+    	double duration = u_values[i] * T_values[i] * overload_factor;
+        if( duration > period ) {
+            duration = period;
+        }
+        printf( "%f\n", duration );
         test_tasks[i] = std::move( new Task( phase, 1, period, period, i, time_slice, duration ) );
     }
 }
