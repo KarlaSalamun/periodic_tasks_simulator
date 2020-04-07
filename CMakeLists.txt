@@ -10,7 +10,7 @@ include_directories(include)
 
 add_library(periodic_simulator STATIC
 	src/Scheduler.cpp
-	src/Simulator.cpp
+		include/Simulator.tpp
 	src/Task.cpp
 	src/TaskCreator.cpp
 	src/UunifastCreator.cpp include/StaticCreator.h src/StaticCreator.cpp)

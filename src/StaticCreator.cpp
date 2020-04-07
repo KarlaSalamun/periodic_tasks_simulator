@@ -13,7 +13,7 @@ void StaticCreator::create_static_tasks( std::vector<Task *> &test_tasks )
     std::vector<double> weights( test_tasks.size() );
 
     test_tasks.resize( task_number );
-    for( int i=0; i<test_tasks.size(); i++ ) {
+    for( size_t i=0; i<test_tasks.size(); i++ ) {
         durations[i] = static_cast<double>( 1 + rand() % 100 );
         weights[i] = static_cast<double>( 1 + rand() % 100 ) / 100.;
         sum_1 += durations[i] * ( 1 - dd_tightness - dd_range/2. );
@@ -24,7 +24,7 @@ void StaticCreator::create_static_tasks( std::vector<Task *> &test_tasks )
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis( sum_1, sum_2 );
 
-    for( int i=0; i<test_tasks.size(); i++ ) {
+    for( size_t i=0; i<test_tasks.size(); i++ ) {
         double due_date = dis(gen);
         test_tasks[i] = std::move( new Task( weights[i], durations[i], due_date ) );
         test_tasks[i]->set_time_started(0);

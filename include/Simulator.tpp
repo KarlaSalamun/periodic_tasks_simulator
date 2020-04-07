@@ -3,20 +3,23 @@
 #include <cassert>
 #include "Simulator.h"
 
-void Simulator::load()
+template <typename T>
+void Simulator<T>::load()
 {
 	tc->load_tasks( pending );
 	initialize_tasks();
 }
 
-void Simulator::create()
+template <typename T>
+void Simulator<T>::create()
 {
 	tc->create_test_set( pending );
 	initialize_tasks();
 	tc->write_tasks( pending );
 }
 
-void Simulator::run()
+template <typename T>
+void Simulator<T>::run()
 {
 	//TODO: budući da running uvijek pokazuje samo na jedan objekt može biti unique_ptr
 	Task *running = nullptr;				// TODO: ovo je leak
@@ -30,7 +33,7 @@ void Simulator::run()
 			
 			if ( (*it)->isReady( abs_time ) ) {
 				(*it)->inc_instance();
-				printf( "task %d is ready!\n", (*it)->get_id() );
+//				printf( "task %d is ready!\n", (*it)->get_id() );
 				ready.push_back( std::move( *it ) );
 				it = pending.erase( it );
 			}
@@ -40,11 +43,30 @@ void Simulator::run()
 		}
 
 		if( !ready.empty() ) {
-			printf( "scheduling tasks : " );
-			for( auto & element : ready ) {
-				printf( "%d ", element->get_id() );
+//			printf( "scheduling tasks : " );
+//			for( auto & element : ready ) {
+//				printf( "%d ", element->get_id() );
+//			}
+//			printf( "\n" );
+
+			if( GPScheduling ) {
+                tctx.ready.clear();
+                tctx.pending.clear();
+                std::copy( pending.begin(), pending.end(), std::back_inserter( tctx.pending ) );
+                std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.ready ) );
+                for( auto & element : ready ) {         // TODO: staviti pointer na vektore u tctx
+                    // printf("%f %f\n", element->period, element->duration);
+                    tctx.task = element;
+                    heuristic->execute( &tctx );
+                    element->set_priority( tctx.task->get_priority() );
+                }
 			}
-			printf( "\n" );
+            else { // EDF scheduling
+                for( size_t i=0; i<ready.size(); i++ ) {
+                    ready[i]->update_priority( abs_time );
+                    // printf( "%d: %f\n", ready[i]->id, ready[i]->priority );
+                }
+            }
 			sched->schedule_next( ready, running, abs_time );
 		}
 
@@ -52,7 +74,7 @@ void Simulator::run()
 		while( it != ready.end() ) {
 			// next arrival time is less than current time -> missed task, new instance appeared
 			if( (*it)->is_missed( abs_time + time_slice ) ) {
-				printf("Missed task %d\n", (*it)->get_id() );
+//				printf("Missed task %d\n", (*it)->get_id() );
 				pending.push_back( *it );
 				it = ready.erase( it );
 				missed++;
@@ -64,18 +86,18 @@ void Simulator::run()
 
 		abs_time += time_slice;
 
-		printf( "\ntime: %f\n\n", abs_time );
+//		printf( "\ntime: %f\n\n", abs_time );
 
 		if( running ) {
 			if( running->isFinished() ) {
-				printf( "task %d is finished!\n", running->get_id() );
+//				printf( "task %d is finished!\n", running->get_id() );
 				running->update_tardiness( abs_time );
 				pending.push_back( std::move( running ) );
 				running = nullptr;
 			}
 			else {
 				running->update_remaining();
-				printf("remaining time: %f\n", running->get_remaining() );
+//				printf("remaining time: %f\n", running->get_remaining() );
 			}
 		}
 		
@@ -99,6 +121,6 @@ void Simulator::run()
         total_tardiness += running->get_tardiness();
 	}
 	
-	printf("missed tasks: %d\n", missed);
+//	printf("missed tasks: %d\n", missed);
 }
 
