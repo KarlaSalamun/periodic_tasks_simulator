@@ -27,7 +27,6 @@ std::vector<double> UunifastCreator::generate_utils()
     std::mt19937 e2(rd());
     std::uniform_real_distribution<> dist(0, 1);
     double sum_u = mean_u;
-    double util;
     
     for( int i=0; i<task_number-1; i++ ) {
         double next_sum_u = sum_u * pow( dist( e2 ), static_cast<double>( 1. / ( task_number-i ) ) );
@@ -35,12 +34,9 @@ std::vector<double> UunifastCreator::generate_utils()
         result[i] = sum_u - next_sum_u;
         // assert( result[i]!=0 );
         sum_u = next_sum_u;
-        util += result[i];
     }
 
     result[task_number-1] = sum_u;
-    util += result[task_number-1];
-    printf( "util :%f\n", util );
     return result;
 }
 
