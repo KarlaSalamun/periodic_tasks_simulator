@@ -7,7 +7,7 @@
 
 int main()
 {
-	TaskCreator *tc = new UunifastCreator( 3, "./test_tasks.txt", 1, 10, 1 );
+	TaskCreator *tc = new UunifastCreator( 3, "./test_tasks.txt", 1, 10, 1, 1.5 );
 	Scheduler *sched = new Scheduler();
 	Simulator<Dummy *> *sim = new Simulator<Dummy *>( 0.01, 10, tc, sched, false );
 	sim->set_heuristic( nullptr );
