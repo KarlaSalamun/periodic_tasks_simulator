@@ -95,6 +95,11 @@ void Task::set_time_started(double time)
     this->time_started = time;
 }
 
+void Task::set_state( state_t state )
+{
+    this->state = state;
+}
+
 // TODO staviti sve gettere const
 int Task::get_id()
 {
@@ -149,6 +154,11 @@ double Task::get_weight()
 double Task::get_time_started()
 {
     return this->time_started;
+}
+
+state_t Task::get_state()
+{
+    return this->state;
 }
 
 void Task::initialize_task() 

@@ -7,6 +7,7 @@
 
 #include <cstdio>
 
+typedef enum _state { RED, BLUE} state_t;
 
 class Task {
     public:
@@ -28,6 +29,7 @@ class Task {
         void set_priority( double priority );
         void set_tardiness( double tard );
         void set_time_started( double time );
+        void set_state( state_t state );
 
         int get_id();
         double get_phase();
@@ -40,6 +42,7 @@ class Task {
         int get_instance();
         double get_weight();
         double get_time_started();
+        state_t get_state();
 
         void initialize_task();
 
@@ -82,6 +85,7 @@ class Task {
         double tardiness;
         double remaining;
         double time_started;
+        state_t state;
 };
 
 
