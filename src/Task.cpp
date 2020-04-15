@@ -174,7 +174,7 @@ void Task::initialize_task()
 
 bool Task::is_missed( double time )
 {
-	return std::islessequal( phase + instance * period, time );
+	return std::islessequal( phase + (instance-1) * period, time );
 }
 
 bool Task::is_next_instance( double time )
@@ -206,4 +206,9 @@ void Task::update_priority( double time )
 void Task::reset_remaining()
 {
     this->remaining = this->duration;
+}
+
+bool Task::missed_deadline(double time)
+{
+    return fabs( time - abs_due_date ) < 0.001 && std::isgreaterequal( remaining, abs_due_date-time );
 }

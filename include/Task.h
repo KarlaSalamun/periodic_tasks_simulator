@@ -51,6 +51,7 @@ class Task {
 
         bool is_missed( double time );
         bool is_next_instance( double time );
+        bool missed_deadline(double time );
 
         void write_task( FILE *fd );
 
