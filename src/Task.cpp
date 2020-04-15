@@ -100,6 +100,11 @@ void Task::set_state( state_t state )
     this->state = state;
 }
 
+void Task::set_skip_factor(int factor)
+{
+    this->skip_factor = factor;
+}
+
 // TODO staviti sve gettere const
 int Task::get_id()
 {
@@ -183,7 +188,22 @@ void Task::update_params()
 	set_abs_dd();
 }
 
+void Task::update_rb_params()
+{
+    set_arrival_time();
+    set_abs_dd();
+    if( this->skip_factor == 0 || this->skip_factor == 1 ) {
+        return;
+    }
+    this->state = ( this->instance % skip_factor == 0 ) ? BLUE : RED;
+}
+
 void Task::update_priority( double time )
 {
 	priority = abs_due_date - time;
+}
+
+void Task::reset_remaining()
+{
+    this->remaining = this->duration;
 }

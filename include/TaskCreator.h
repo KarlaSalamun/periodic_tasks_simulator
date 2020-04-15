@@ -11,8 +11,8 @@
 
 class TaskCreator {
     public:
-        TaskCreator( int task_number, std::string filename ) :
-            task_number( task_number ), filename( filename ) {}
+        TaskCreator( int task_number, std::string filename, bool skippable ) :
+            task_number( task_number ), filename( filename ), skippable( skippable ) {}
 
         TaskCreator() = default;
 
@@ -28,13 +28,13 @@ class TaskCreator {
         virtual void create_test_set( std::vector<Task *> &test_tasks );
         void write_tasks( std::vector<Task *>  &test_tasks );
         void load_tasks( std::vector<Task *> &test_tasks );
+        void load_skippable_tasks( std::vector<Task *> &test_tasks );
 
     protected:
         int task_number;
         double time_slice;
-        
-    private:
         std::string filename;
+        bool skippable;
 };
 
 #endif 

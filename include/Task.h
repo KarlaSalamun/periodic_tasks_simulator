@@ -16,6 +16,7 @@ class Task {
         void update_tardiness( double time );
         void update_remaining();
         void update_params();
+        void update_rb_params();
         void update_priority( double time );
 
         bool isReady( double time );
@@ -30,6 +31,8 @@ class Task {
         void set_tardiness( double tard );
         void set_time_started( double time );
         void set_state( state_t state );
+        void set_skip_factor( int factor );
+        void reset_remaining();
 
         int get_id();
         double get_phase();
@@ -59,6 +62,7 @@ class Task {
             remaining = duration;
             tardiness = 0;
             isPreempted = false;
+            state = RED;
         }
 
         // this ctor is used for static tasks
@@ -80,12 +84,17 @@ class Task {
         double weight;
         double arrival_time;
         double duration;
+        int skip_factor;
         double abs_due_date;
         double priority;
         double tardiness;
         double remaining;
         double time_started;
         state_t state;
+        void toggle_state()
+        {
+            this->state = ( this->state == RED ) ? BLUE : RED;
+        }
 };
 
 

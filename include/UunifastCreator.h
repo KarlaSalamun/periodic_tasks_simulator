@@ -5,8 +5,8 @@
 
 class UunifastCreator : public TaskCreator {
 public:
-	UunifastCreator( int task_number, std::string filename, double lim_u, double lim_d, double granulation, double overload_factor ) : 
-		TaskCreator( task_number, filename )
+	UunifastCreator( int task_number, std::string filename, bool skippable, double lim_u, double lim_d, double granulation, double overload_factor ) :
+		TaskCreator( task_number, filename, skippable )
 	{
 		this->lim_u = lim_u;
 		this->lim_d = lim_d;
