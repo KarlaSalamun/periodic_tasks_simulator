@@ -35,10 +35,21 @@ public:
     void set_heuristic( T heur )
     {
 	    this->heuristic = heur;
-}
+    }
+    void set_finish_time( double time )
+    {
+	    finish_time = time;
+    }
 	void run();
 	void load();
 	void create();
+	std::vector<double> get_deadline_vector() {
+	    return deadline_vector;
+	}
+	std::vector<double> get_idle_time_vector() {
+	    return idle_time_vector;
+	}
+
 private:
 	//TODO: clanovi mogu biti unique_ptr
     struct task_ctx tctx;
@@ -53,6 +64,8 @@ private:
 	double total_tardiness;
 	T heuristic;
 	bool GPScheduling;
+	std::vector<double> deadline_vector;
+	std::vector<double> idle_time_vector;
 
 	void initialize_tasks()
 	{

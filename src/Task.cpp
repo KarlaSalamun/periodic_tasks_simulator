@@ -116,7 +116,7 @@ double Task::get_phase()
 	return this->phase;
 }
 
-double Task::get_period()
+double Task::get_period() const
 {
 	return this->period;
 }
@@ -164,6 +164,11 @@ double Task::get_time_started()
 state_t Task::get_state()
 {
     return this->state;
+}
+
+int Task::get_skip_factor()
+{
+    return this->skip_factor;
 }
 
 void Task::initialize_task() 

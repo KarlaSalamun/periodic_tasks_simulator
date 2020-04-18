@@ -21,6 +21,7 @@ void Simulator<T>::create()
 template <typename T>
 void Simulator<T>::run()
 {
+    double tmp_idle = 0;
 	//TODO: budući da running uvijek pokazuje samo na jedan objekt može biti unique_ptr
 	Task *running = nullptr;				// TODO: ovo je leak
 	while( abs_time < finish_time ) {
@@ -84,6 +85,17 @@ void Simulator<T>::run()
 			}
 		}
 
+		if( !running ) {
+            deadline_vector.push_back( abs_time );
+            tmp_idle += time_slice;
+		}
+		else {
+		    if( isgreaterequal(fabs( tmp_idle ), 0) ) {
+		        idle_time_vector.push_back( tmp_idle );
+		        tmp_idle = 0;
+		    }
+		}
+
 		abs_time += time_slice;
 
 //		printf( "\ntime: %f\n\n", abs_time );
@@ -101,7 +113,7 @@ void Simulator<T>::run()
 			}
 		}
 		
-		for( auto & element : pending ) {
+    for( auto & element : pending ) {
 			if( element->is_next_instance( abs_time ) ) {
 				element->update_params();
 			}

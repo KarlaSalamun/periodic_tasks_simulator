@@ -36,7 +36,7 @@ class Task {
 
         int get_id();
         double get_phase();
-        double get_period();
+        double get_period() const;
         double get_duration();
         double get_abs_due_date();
         double get_remaining();
@@ -46,6 +46,7 @@ class Task {
         double get_weight();
         double get_time_started();
         state_t get_state();
+        int get_skip_factor();
 
         void initialize_task();
 
