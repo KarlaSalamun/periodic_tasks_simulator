@@ -27,10 +27,15 @@ public:
 		tc->set_time_slice( time_slice );
 		abs_time = 0;
 		missed = 0;
+		idle = false;
 	}
 	double get_total_tardiness()
     {
 	    return total_tardiness;
+    }
+    std::vector<Task *> get_pending()
+    {
+        return pending;
     }
     void set_heuristic( T heur )
     {
@@ -64,6 +69,7 @@ private:
 	double total_tardiness;
 	T heuristic;
 	bool GPScheduling;
+	bool idle;
 	std::vector<double> deadline_vector;
 	std::vector<double> idle_time_vector;
 

@@ -22,6 +22,7 @@ template <typename T>
 void Simulator<T>::run()
 {
     double tmp_idle = 0;
+    double start_idle = 0;
 	//TODO: budući da running uvijek pokazuje samo na jedan objekt može biti unique_ptr
 	Task *running = nullptr;				// TODO: ovo je leak
 	while( abs_time < finish_time ) {
@@ -42,6 +43,26 @@ void Simulator<T>::run()
 				it++;
 			}
 		}
+
+        if( !running ) {
+            if( !idle ) {
+                start_idle = abs_time;
+                idle = true;
+                printf("IDLE\n");
+            }
+            else {
+                tmp_idle += time_slice;
+                printf("idle: %f\n", tmp_idle);
+            }
+        }
+        else {
+            if( isgreater(fabs( tmp_idle ), 0) ) {
+                idle_time_vector.push_back( tmp_idle );
+                deadline_vector.push_back( start_idle );
+                tmp_idle = 0;
+                idle = false;
+            }
+        }
 
 		if( !ready.empty() ) {
 //			printf( "scheduling tasks : " );
@@ -85,25 +106,15 @@ void Simulator<T>::run()
 			}
 		}
 
-		if( !running ) {
-            deadline_vector.push_back( abs_time );
-            tmp_idle += time_slice;
-		}
-		else {
-		    if( isgreaterequal(fabs( tmp_idle ), 0) ) {
-		        idle_time_vector.push_back( tmp_idle );
-		        tmp_idle = 0;
-		    }
-		}
-
 		abs_time += time_slice;
-
-//		printf( "\ntime: %f\n\n", abs_time );
+		printf( "\ntime: %f\n\n", abs_time );
 
 		if( running ) {
+		    idle = false;
 			if( running->isFinished() ) {
-//				printf( "task %d is finished!\n", running->get_id() );
+				printf( "task %d is finished!\n", running->get_id() );
 				running->update_tardiness( abs_time );
+				running->reset_remaining();
 				pending.push_back( std::move( running ) );
 				running = nullptr;
 			}
@@ -118,6 +129,11 @@ void Simulator<T>::run()
 				element->update_params();
 			}
 		}
+	}
+
+	if( idle ) {
+	    deadline_vector.push_back( start_idle );
+	    idle_time_vector.push_back( tmp_idle + time_slice );
 	}
 
 	for( auto & element : pending ) {
