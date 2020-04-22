@@ -105,6 +105,16 @@ void Task::set_skip_factor(int factor)
     this->skip_factor = factor;
 }
 
+void Task::set_time_slice( double timeslice )
+{
+    this->time_slice = timeslice;
+}
+
+void Task::set_curr_skip_value(int value)
+{
+    this->current_skip_value = value;
+}
+
 // TODO staviti sve gettere const
 int Task::get_id()
 {
@@ -126,7 +136,7 @@ double Task::get_duration()
 	return this->duration;
 }
 
-double Task::get_abs_due_date()
+double Task::get_abs_due_date() const
 {
 	return this->abs_due_date;
 }
@@ -171,9 +181,20 @@ int Task::get_skip_factor()
     return this->skip_factor;
 }
 
+double Task::get_arrival_time()
+{
+    return this->arrival_time;
+}
+
+int Task::get_curr_skip_value()
+{
+    return this->current_skip_value;
+}
+
 void Task::initialize_task() 
 {
 	arrival_time = phase;
+	instance = 1;
 	set_abs_dd();
 }
 

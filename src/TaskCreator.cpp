@@ -42,6 +42,7 @@ void TaskCreator::load_tasks( std::vector<Task *>  &test_tasks )
         fscanf( fd, "%d %lf %lf %lf %d", &id, &phase, &period, &duration, &skip_factor );
         // TODO treba li mi ovdje move
         test_tasks[i] = std::move( new Task( phase, 1, period, period, i, time_slice, duration ) );
+        test_tasks[i]->set_time_slice( this->time_slice );
         if( skippable ) {
             test_tasks[i]->set_skip_factor( skip_factor );
         }

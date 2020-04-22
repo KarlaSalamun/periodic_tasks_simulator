@@ -9,9 +9,9 @@ void Scheduler::schedule_next( std::vector<Task *> &ready, Task *&running, doubl
 
 	if( running ) {
 		if ( preempt( ready[0], running ) ) {
-			printf( "task %d is preempted, ", running->get_id() );
+//			printf( "task %d is preempted, ", running->get_id() );
 			running->isPreempted = true;
-			printf( "remaining time %f\n", running->get_remaining() );
+//			printf( "remaining time %f\n", running->get_remaining() );
 			std::swap( ready[0], running );
 		}
 	}
@@ -20,7 +20,7 @@ void Scheduler::schedule_next( std::vector<Task *> &ready, Task *&running, doubl
 		ready.erase( ready.begin() );
 	}
 
-	printf( "instance %d of task %d is running!\n", running->get_instance() - 1, running->get_id() );
+//	printf( "instance %d of task %d is running!\n", running->get_instance() - 1, running->get_id() );
 }
 
 bool Scheduler::preempt( const Task *t1, const Task *t2 )
