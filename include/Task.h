@@ -49,7 +49,7 @@ class Task {
         double get_time_started();
         state_t get_state();
         int get_skip_factor();
-        double get_arrival_time();
+        double get_arrival_time() const;
         int get_curr_skip_value();
 
         void initialize_task();
@@ -59,6 +59,8 @@ class Task {
         bool missed_deadline(double time );
 
         void write_task( FILE *fd );
+
+        void inc_skip_value();
 
         // this ctor is used for periodic tasks
         Task( double phase, int instance, double period, double rel_due_date, int id, double time_slice, double duration ) :
@@ -75,6 +77,17 @@ class Task {
         Task( double weight, double duration, double due_date ) : weight( weight ), duration( duration ), abs_due_date( due_date ) {}
 
         Task() = default;
+
+        Task( const Task *task ) {
+            this->period = task->period;
+            this->remaining = task->remaining;
+            this->rel_due_date = task->rel_due_date;
+            this->arrival_time = task->arrival_time;
+            this->duration = task->duration;
+            this->instance = task->instance;
+            this->state = task->state;
+            this->time_slice = task->time_slice;
+        }
 
         ~Task() = default;
 

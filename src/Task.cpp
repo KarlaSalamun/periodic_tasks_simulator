@@ -30,7 +30,7 @@ void Task::set_abs_dd()
 
 bool Task::isReady( double time ) 
 {
-	return fabs( time - arrival_time ) < 0.001;
+    return fabs( time - arrival_time ) < 0.001;
 }
 
 bool Task::isFinished() 
@@ -181,7 +181,7 @@ int Task::get_skip_factor()
     return this->skip_factor;
 }
 
-double Task::get_arrival_time()
+double Task::get_arrival_time() const
 {
     return this->arrival_time;
 }
@@ -195,6 +195,7 @@ void Task::initialize_task()
 {
 	arrival_time = phase;
 	instance = 1;
+	current_skip_value = 1;
 	set_abs_dd();
 }
 
@@ -205,7 +206,7 @@ bool Task::is_missed( double time )
 
 bool Task::is_next_instance( double time )
 {
-	return std::isgreaterequal( phase + instance * period, time );
+	return std::isgreaterequal( time, phase + instance * period );
 }
 
 void Task::update_params()
@@ -221,7 +222,20 @@ void Task::update_rb_params()
     if( this->skip_factor == 0 || this->skip_factor == 1 ) {
         return;
     }
-    this->state = ( this->instance % skip_factor == 0 ) ? BLUE : RED;
+    /*
+    if( this->state == RED ) {
+        this->state = BLUE;
+        return;
+    }
+    current_skip_value++;
+    if( current_skip_value >= skip_factor ) {
+        current_skip_value = 0;
+        this->state = RED;
+    }
+    else {
+        this->state = BLUE;
+    }*/
+    this->state = BLUE;
 }
 
 void Task::update_priority( double time )
@@ -237,4 +251,9 @@ void Task::reset_remaining()
 bool Task::missed_deadline(double time)
 {
     return fabs( time - abs_due_date ) < 0.001 && std::isgreaterequal( remaining, abs_due_date-time );
+}
+
+void Task::inc_skip_value()
+{
+    this->current_skip_value++;
 }
