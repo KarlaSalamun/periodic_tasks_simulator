@@ -1,6 +1,9 @@
 #pragma once
 
-#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <cmath>
+#include <utility>
 #include "TaskCreator.h"
 
 class UunifastCreator : public TaskCreator {
@@ -15,6 +18,14 @@ public:
 	}
 
 	virtual void create_test_set( std::vector<Task *> &test_tasks ) override;
+	void set_overload( double overload ) {
+	    this->overload_factor = overload;
+	}
+	double get_hyperperiod()
+    {
+	    return hyperperiod;
+    }
+    void compute_overloaded( std::vector<Task *> &test_tasks, std::vector<double > init );
 
 private:
 	double lim_u;
@@ -25,4 +36,5 @@ private:
 
 	std::vector<double> generate_utils();
 	std::vector<double> generate_log_uniform();
+    void convert( std::vector<double> &values );
 };

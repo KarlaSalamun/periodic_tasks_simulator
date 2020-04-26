@@ -115,6 +115,11 @@ void Task::set_curr_skip_value(int value)
     this->current_skip_value = value;
 }
 
+void Task::set_duration( double duration )
+{
+    this->duration = duration;
+}
+
 // TODO staviti sve gettere const
 int Task::get_id()
 {
@@ -197,6 +202,8 @@ void Task::initialize_task()
 	instance = 1;
 	current_skip_value = 1;
 	set_abs_dd();
+	remaining = duration;
+	state = RED;
 }
 
 bool Task::is_missed( double time )

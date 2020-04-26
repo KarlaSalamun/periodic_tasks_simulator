@@ -7,6 +7,9 @@
 
 #include <vector>
 #include <string>
+#include <numeric>
+#include <cmath>
+#include <utility>
 #include "Task.h"
 
 class TaskCreator {
@@ -29,12 +32,14 @@ class TaskCreator {
         void write_tasks( std::vector<Task *>  &test_tasks );
         void load_tasks( std::vector<Task *> &test_tasks );
         void load_skippable_tasks( std::vector<Task *> &test_tasks );
+        virtual void compute_hyperperiod( std::vector<Task *> &tasks );
 
     protected:
         int task_number;
         double time_slice;
         std::string filename;
         bool skippable;
+        int hyperperiod;
 };
 
 #endif 

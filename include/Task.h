@@ -35,8 +35,9 @@ class Task {
         void set_time_slice( double timeslice );
         void reset_remaining();
         void set_curr_skip_value( int value );
+        void set_duration( double duration );
 
-        int get_id();
+    int get_id();
         double get_phase();
         double get_period() const;
         double get_duration();

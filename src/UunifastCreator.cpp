@@ -3,19 +3,21 @@
 
 void UunifastCreator::create_test_set( std::vector<Task *> &test_tasks )
 {
+    double duration;
+    double period;
     test_tasks.resize( task_number );
-
+    mean_u = overload_factor;
     std::vector<double> u_values = generate_utils();
+    convert( u_values );
     std::vector<double> T_values = generate_log_uniform();
 
     for( size_t i=0; i<test_tasks.size(); i++ ) {
-    	double period = T_values[i];
+    	period = T_values[i];
     	double phase = 0;
-    	double duration = u_values[i] * T_values[i] * overload_factor;
-        if( duration > period ) {
-            duration = period;
-        }
+//        convert( u_values );
+    	duration = u_values[i] * T_values[i];
         printf( "%f\n", duration );
+        period *= 10;
         test_tasks[i] = std::move( new Task( phase, 1, period, period, i, time_slice, duration ) );
     }
 }
@@ -53,4 +55,32 @@ std::vector<double> UunifastCreator::generate_log_uniform()
         result[i] = floor( exp( r_factor[i] ) / granulation ) * granulation;
     }
     return result;
+}
+
+void UunifastCreator::convert( std::vector<double> &values )
+{
+    for( auto & element : values ) {
+        element = round( element * 10 );
+    }
+}
+
+void TaskCreator::compute_hyperperiod(std::vector<Task *> &tasks)
+{
+    std::vector<int> periods;
+    for( auto & element : tasks ) {
+        periods.push_back( static_cast<int>( element->get_period() ) );
+    }
+    hyperperiod = std::accumulate(periods.begin(), periods.end(), 1,
+                                  [](int a, int b) -> int {
+                                      return abs( a * b) / std::__gcd(a, b);
+                                  });
+}
+
+void UunifastCreator::compute_overloaded( std::vector<Task *> &test_tasks, std::vector<double> init )
+{
+    for( size_t i =0; i<test_tasks.size(); i++ ) {
+        double duration = static_cast<int>( init[i] * overload_factor * 100 );
+        duration /= 100.0;
+        test_tasks[i]->set_duration( duration );
+    }
 }
