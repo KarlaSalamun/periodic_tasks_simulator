@@ -30,7 +30,8 @@ void Task::set_abs_dd()
 
 bool Task::isReady( double time ) 
 {
-    return fabs( time - arrival_time ) < 0.001;
+//    return fabs( time - arrival_time ) < 0.001;
+    return time >= arrival_time;
 }
 
 bool Task::isFinished() 
@@ -118,6 +119,11 @@ void Task::set_curr_skip_value(int value)
 void Task::set_duration( double duration )
 {
     this->duration = duration;
+}
+
+void Task::set_weight( double weight )
+{
+    this->weight = weight;
 }
 
 // TODO staviti sve gettere const

@@ -24,20 +24,7 @@ class Task {
 
         void inc_instance();
 
-        void set_arrival_time();
-        void set_abs_dd();
-        void set_arrival_time( double arrival_time );
-        void set_priority( double priority );
-        void set_tardiness( double tard );
-        void set_time_started( double time );
-        void set_state( state_t state );
-        void set_skip_factor( int factor );
-        void set_time_slice( double timeslice );
-        void reset_remaining();
-        void set_curr_skip_value( int value );
-        void set_duration( double duration );
-
-    int get_id();
+        int get_id();
         double get_phase();
         double get_period() const;
         double get_duration();
@@ -52,6 +39,20 @@ class Task {
         int get_skip_factor();
         double get_arrival_time() const;
         int get_curr_skip_value();
+
+        void set_arrival_time();
+        void set_abs_dd();
+        void set_arrival_time( double arrival_time );
+        void set_priority( double priority );
+        void set_tardiness( double tard );
+        void set_time_started( double time );
+        void set_state( state_t state );
+        void set_skip_factor( int factor );
+        void set_time_slice( double timeslice );
+        void reset_remaining();
+        void set_curr_skip_value( int value );
+        void set_duration( double duration );
+        void set_weight( double weight );
 
         void initialize_task();
 
@@ -88,6 +89,9 @@ class Task {
             this->instance = task->instance;
             this->state = task->state;
             this->time_slice = task->time_slice;
+            this->id = task->id;
+            this->abs_due_date = task->abs_due_date;
+            this->tardiness = task->tardiness;
         }
 
         ~Task() = default;

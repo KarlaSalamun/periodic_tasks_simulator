@@ -10,7 +10,7 @@
 struct task_ctx {
     Task *task;
     std::vector<Task *> pending;
-    std::vector<Task *> ready;
+    std::vector<Task *> processed;
 };
 
 class Dummy {
@@ -36,6 +36,10 @@ public:
     std::vector<Task *> get_pending()
     {
         return pending;
+    }
+    int get_missed()
+    {
+	    return missed;
     }
     void set_heuristic( T heur )
     {
