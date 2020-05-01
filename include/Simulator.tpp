@@ -1,7 +1,24 @@
+#pragma once
+
 #include <cmath>
 #include <math.h>
 #include <cassert>
 #include "Simulator.h"
+
+static int compare_members(const void *m1, const void *m2)
+{
+    const double* member1 = static_cast<const double *>(m1);
+    const double* member2 = static_cast<const double *>(m2);
+    if( member1 < member2 ) {
+        return -1;
+    }
+    else if( member1 == member2 ) {
+        return 0;
+    }
+    else {
+        return 1;
+    }
+}
 
 template <typename T>
 void Simulator<T>::load()
@@ -29,25 +46,26 @@ void Simulator<T>::run()
     missed = 0;
     total_tardiness = 0;
     int all_tasks = 0;
-	//TODO: budući da running uvijek pokazuje samo na jedan objekt može biti unique_ptr
-	Task *running = nullptr;				// TODO: ovo je leak
 	abs_time = 0;
+	running = nullptr;
+
 	while( abs_time < finish_time ) {
 		std::vector<Task *>::iterator it;
-/*
+
+		// abort running task if about to miss deadline
         if( running ) {
             if( abs_time == running->get_abs_due_date() and
                 std::isgreater( running->get_remaining(), 0  )  ) {
                 running->inc_instance();
                 running->update_params();
                 running->reset_remaining();
+                running->skip_factors.push_back( running->get_curr_skip_value() );
+                running->reset_skip_value();
                 pending.push_back( std::move( running ) );
                 running = nullptr;
-//                printf( "MISS\n" );
                 missed++;
             }
         }
-        */
 
         it = ready.begin();
         while( it != ready.end() ) {
@@ -55,6 +73,8 @@ void Simulator<T>::run()
                 (*it)->inc_instance();
                 (*it)->update_params();
                 (*it)->reset_remaining();
+                (*it)->skip_factors.push_back( (*it)->get_curr_skip_value() );
+                (*it)->reset_skip_value();
                 pending.push_back(std::move(*it));
                 it = ready.erase(it);
                 missed++;
@@ -160,6 +180,7 @@ void Simulator<T>::run()
 				running->reset_remaining();
 				running->inc_instance();
 				running->update_params();
+				running->inc_skip_value();
 				running->isPreempted = false;
 //				if( islessequal( running->get_arrival_time(), abs_time ) ) {
 //				    ready.push_back( std::move( running ) );
@@ -184,12 +205,16 @@ void Simulator<T>::run()
 	for( auto & element : pending ) {
 //		printf( "%d tardiness: %f\n", element->get_id(), element->get_tardiness() );
 		total_tardiness += element->get_tardiness();
-	}
+		if( element->get_curr_skip_value() > 0 ) {
+		    element->skip_factors.push_back( element->get_curr_skip_value() );
+		}
+    }
 	for( auto & element : ready ) {
 //		printf( "%d tardiness: %f\n", element->get_id(), element->get_tardiness() );
         total_tardiness += element->get_tardiness();
         if( element->get_arrival_time() < abs_time ) {
             missed++;
+            element->skip_factors.push_back( element->get_curr_skip_value() );
         }
 	}
 	if( running ) {
@@ -197,10 +222,46 @@ void Simulator<T>::run()
         total_tardiness += running->get_tardiness();
         if( abs_time == running->get_abs_due_date() and
             std::isgreater( running->get_remaining(), 0  )  ) {
+            running->skip_factors.push_back( running->get_curr_skip_value() );
             missed++;
         }
 	}
-
 //	printf("missed tasks: %d\n", missed);
 }
 
+template <typename T>
+double Simulator<T>::compute_skip_fitness()
+{
+    double sum = 0;
+    for( auto & element : pending ) {
+        sum += element->get_weight() * element->compute_mean_skip_factor();
+    }
+    for( auto & element : ready ) {
+        sum += element->get_weight() * element->compute_mean_skip_factor();
+    }
+    if( running ) {
+        sum += running->get_weight() * running->compute_mean_skip_factor();
+    }
+    return sum;
+}
+
+template <typename T>
+double Simulator<T>::compute_deviation()
+{
+    double dev = 0;
+    std::vector<double> factors;
+
+    for( auto & element : pending ) {
+        factors.push_back( element->compute_mean_skip_factor() );
+    }
+    for( auto & element : ready ) {
+        factors.push_back( element->compute_mean_skip_factor() );
+    }
+    if( running ) {
+        factors.push_back( running->compute_mean_skip_factor() );
+    }
+    qsort( factors.data(), factors.size(), sizeof(double), compare_members );
+
+    dev = ( factors[0] - factors[factors.size() - 1] ) / factors.size();
+    return dev;
+}

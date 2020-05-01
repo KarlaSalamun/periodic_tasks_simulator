@@ -214,6 +214,8 @@ void Task::initialize_task()
 	state = RED;
 	isPreempted = false;
 	tardiness = 0;
+	skip_factors.clear();
+	weight = 1;
 }
 
 bool Task::is_missed( double time )
@@ -276,4 +278,21 @@ bool Task::missed_deadline(double time)
 void Task::inc_skip_value()
 {
     this->current_skip_value++;
+}
+
+void Task::reset_skip_value()
+{
+    this->current_skip_value = 0;
+}
+
+double Task::compute_mean_skip_factor()
+{
+    if( skip_factors.empty() ) {
+        return 0;
+    }
+    double sum = 0;
+    for( auto & element : skip_factors ) {
+        sum += element;
+    }
+    return sum / static_cast<double>( skip_factors.size() );
 }

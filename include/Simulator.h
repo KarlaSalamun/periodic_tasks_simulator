@@ -28,6 +28,7 @@ public:
 		abs_time = 0;
 		missed = 0;
 		idle = false;
+		running = nullptr;
 	}
 	double get_total_tardiness()
     {
@@ -63,11 +64,15 @@ public:
 	    return idle_time_vector;
 	}
 
+    double compute_deviation();
+	double compute_skip_fitness();
+
 private:
 	//TODO: clanovi mogu biti unique_ptr
     struct task_ctx tctx;
 	std::vector<Task *> pending;
 	std::vector<Task *> ready;
+	Task *running;
 	double time_slice;
 	double finish_time;
 	TaskCreator *tc;

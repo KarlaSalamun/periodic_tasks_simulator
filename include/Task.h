@@ -6,6 +6,7 @@
 #define TASK_H
 
 #include <cstdio>
+#include <vector>
 
 typedef enum _state { RED, BLUE} state_t;
 
@@ -63,12 +64,16 @@ class Task {
         void write_task( FILE *fd );
 
         void inc_skip_value();
+        void reset_skip_value();
+        double compute_mean_skip_factor();
 
-        // this ctor is used for periodic tasks
+
+    // this ctor is used for periodic tasks
         Task( double phase, int instance, double period, double rel_due_date, int id, double time_slice, double duration ) :
             phase( phase ), instance( instance ), period( period ), rel_due_date( rel_due_date ), 
             id( id ), time_slice( time_slice ), duration( duration )
         {
+            current_skip_value = 0;
             remaining = duration;
             tardiness = 0;
             isPreempted = false;
@@ -94,11 +99,15 @@ class Task {
             this->tardiness = task->tardiness;
             this->isPreempted = task->isPreempted;
             this->phase = task->phase;
+            this->current_skip_value = task->current_skip_value;
+            this->skip_factors = task->skip_factors;
+            this->weight = task->weight;
         }
 
         ~Task() = default;
 
         bool isPreempted;
+        std::vector<int> skip_factors;
 
     private:
         double phase;
@@ -119,9 +128,6 @@ class Task {
         state_t state;
         int current_skip_value;
 };
-
-
-
 #endif 
 
 
