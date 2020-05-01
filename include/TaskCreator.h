@@ -27,6 +27,10 @@ class TaskCreator {
         {
             this->time_slice = time_slice;
         }
+        void set_filename( std::string filename )
+        {
+            this->filename = filename;
+        }
 
         virtual void create_test_set( std::vector<Task *> &test_tasks );
         void write_tasks( std::vector<Task *>  &test_tasks );

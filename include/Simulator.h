@@ -49,6 +49,10 @@ public:
     {
 	    finish_time = time;
     }
+    void set_pending( std::vector<Task *> pending )
+    {
+	    this->pending = pending;
+    }
 	void run();
 	void load();
 	void create();

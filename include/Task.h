@@ -92,6 +92,8 @@ class Task {
             this->id = task->id;
             this->abs_due_date = task->abs_due_date;
             this->tardiness = task->tardiness;
+            this->isPreempted = task->isPreempted;
+            this->phase = task->phase;
         }
 
         ~Task() = default;

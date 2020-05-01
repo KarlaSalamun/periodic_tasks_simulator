@@ -30,7 +30,9 @@ void Task::set_abs_dd()
 
 bool Task::isReady( double time ) 
 {
-//    return fabs( time - arrival_time ) < 0.001;
+    if( fabs( time - arrival_time ) < 0.001 ) {
+        return true;
+    }
     return time >= arrival_time;
 }
 
@@ -210,6 +212,8 @@ void Task::initialize_task()
 	set_abs_dd();
 	remaining = duration;
 	state = RED;
+	isPreempted = false;
+	tardiness = 0;
 }
 
 bool Task::is_missed( double time )
@@ -219,6 +223,9 @@ bool Task::is_missed( double time )
 
 bool Task::is_next_instance( double time )
 {
+    if( fabs( phase + instance * period - time ) < 0.001 ) {
+        return true;
+    }
 	return std::isgreaterequal( time, phase + instance * period );
 }
 

@@ -26,8 +26,12 @@ void Simulator<T>::run()
 {
     double tmp_idle = 0;
     double start_idle = 0;
+    missed = 0;
+    total_tardiness = 0;
+    int all_tasks = 0;
 	//TODO: budući da running uvijek pokazuje samo na jedan objekt može biti unique_ptr
 	Task *running = nullptr;				// TODO: ovo je leak
+	abs_time = 0;
 	while( abs_time < finish_time ) {
 		std::vector<Task *>::iterator it;
 /*
@@ -66,6 +70,7 @@ void Simulator<T>::run()
 			assert( (*it)->get_abs_due_date() > 0 );
 			
 			if ( (*it)->isReady( abs_time ) ) {
+			    all_tasks++;
 //				printf( "task %d is ready!\n", (*it)->get_id() );
 				ready.push_back( std::move( *it ) );
 				it = pending.erase( it );
@@ -155,6 +160,7 @@ void Simulator<T>::run()
 				running->reset_remaining();
 				running->inc_instance();
 				running->update_params();
+				running->isPreempted = false;
 //				if( islessequal( running->get_arrival_time(), abs_time ) ) {
 //				    ready.push_back( std::move( running ) );
 //				}
