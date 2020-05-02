@@ -19,6 +19,8 @@ class TaskCreator {
 
         TaskCreator() = default;
 
+        virtual ~TaskCreator() = default;
+
         void set_task_number( int task_number )
         {
             this->task_number = task_number;

@@ -102,6 +102,7 @@ class Task {
             this->current_skip_value = task->current_skip_value;
             this->skip_factors = task->skip_factors;
             this->weight = task->weight;
+            this->priority = task->priority;
         }
 
         ~Task() = default;

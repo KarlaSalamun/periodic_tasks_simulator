@@ -7,16 +7,16 @@
 
 static int compare_members(const void *m1, const void *m2)
 {
-    const double* member1 = static_cast<const double *>(m1);
-    const double* member2 = static_cast<const double *>(m2);
-    if( member1 < member2 ) {
+    if (*(double*)m1 > *(double*)m2) {
         return -1;
     }
-    else if( member1 == member2 ) {
-        return 0;
-    }
-    else {
+
+    else if( (*(double*)m1 < *(double*)m2) ) {
         return 1;
+    }
+
+    else {
+        return  0;
     }
 }
 
@@ -138,14 +138,15 @@ void Simulator<T>::run()
 
 //                std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.pending ) );
                 it = ready.begin();
+                Task *tmp = new Task();
                 while( it != ready.end() ) {
                     tctx.pending.clear();
-                    Task *tmp = new Task( *it );
+                    tmp = std::move( *it );
                     tctx.task = tmp;
                     it = ready.erase( it );
                     std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.pending ) );
                     heuristic->execute( &tctx );
-                    tctx.processed.push_back( tmp );
+                    tctx.processed.push_back( std::move( tmp ) );
                 }
                 std::copy( tctx.processed.begin(), tctx.processed.end(), std::back_inserter( ready ) );
 
@@ -233,16 +234,20 @@ template <typename T>
 double Simulator<T>::compute_skip_fitness()
 {
     double sum = 0;
+    int tasks = 0;
     for( auto & element : pending ) {
         sum += element->get_weight() * element->compute_mean_skip_factor();
+        tasks++;
     }
     for( auto & element : ready ) {
         sum += element->get_weight() * element->compute_mean_skip_factor();
+        tasks++;
     }
     if( running ) {
         sum += running->get_weight() * running->compute_mean_skip_factor();
+        tasks++;
     }
-    return sum;
+    return sum / static_cast<double>( tasks );
 }
 
 template <typename T>
@@ -263,5 +268,8 @@ double Simulator<T>::compute_deviation()
     qsort( factors.data(), factors.size(), sizeof(double), compare_members );
 
     dev = ( factors[0] - factors[factors.size() - 1] ) / factors.size();
+
+    assert( dev >= 0 );
+
     return dev;
 }
