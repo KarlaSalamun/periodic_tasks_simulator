@@ -27,6 +27,7 @@ public:
 		tc->set_time_slice( time_slice );
 		abs_time = 0;
 		missed = 0;
+		completed = 0;
 		idle = false;
 		running = nullptr;
 	}
@@ -79,6 +80,7 @@ private:
 	Scheduler *sched;
 	double abs_time;
 	int missed;
+	int completed;
 	double total_tardiness;
 	T heuristic;
 	bool GPScheduling;

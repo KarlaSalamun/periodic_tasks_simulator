@@ -208,7 +208,7 @@ void Task::initialize_task()
 {
 	arrival_time = phase;
 	instance = 1;
-	current_skip_value = 1;
+	current_skip_value = 0;
 	set_abs_dd();
 	remaining = duration;
 	state = RED;

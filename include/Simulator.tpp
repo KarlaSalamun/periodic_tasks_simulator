@@ -20,6 +20,22 @@ static int compare_members(const void *m1, const void *m2)
     }
 }
 
+static int compare_factors(const void *m1, const void *m2)
+{
+    if (*(int*)m1 > *(int*)m2) {
+        return -1;
+    }
+
+    else if( (*(int*)m1 < *(int*)m2) ) {
+        return 1;
+    }
+
+    else {
+        return  0;
+    }
+}
+
+
 template <typename T>
 void Simulator<T>::load()
 {
@@ -44,6 +60,7 @@ void Simulator<T>::run()
     double tmp_idle = 0;
     double start_idle = 0;
     missed = 0;
+    completed = 0;
     total_tardiness = 0;
     int all_tasks = 0;
 	abs_time = 0;
@@ -179,6 +196,7 @@ void Simulator<T>::run()
 //				printf( "task %d is finished!\n", running->get_id() );
 				running->update_tardiness( abs_time );
 				running->reset_remaining();
+				completed++;
 				running->inc_instance();
 				running->update_params();
 				running->inc_skip_value();
@@ -206,9 +224,7 @@ void Simulator<T>::run()
 	for( auto & element : pending ) {
 //		printf( "%d tardiness: %f\n", element->get_id(), element->get_tardiness() );
 		total_tardiness += element->get_tardiness();
-		if( element->get_curr_skip_value() > 0 ) {
-		    element->skip_factors.push_back( element->get_curr_skip_value() );
-		}
+		element->skip_factors.push_back( element->get_curr_skip_value() );
     }
 	for( auto & element : ready ) {
 //		printf( "%d tardiness: %f\n", element->get_id(), element->get_tardiness() );
@@ -227,7 +243,6 @@ void Simulator<T>::run()
             missed++;
         }
 	}
-//	printf("missed tasks: %d\n", missed);
 }
 
 template <typename T>
@@ -236,14 +251,17 @@ double Simulator<T>::compute_skip_fitness()
     double sum = 0;
     int tasks = 0;
     for( auto & element : pending ) {
+        qsort( element->skip_factors.data(), element->skip_factors.size(), sizeof(int), compare_factors );
         sum += element->get_weight() * element->compute_mean_skip_factor();
         tasks++;
     }
     for( auto & element : ready ) {
+        qsort( element->skip_factors.data(), element->skip_factors.size(), sizeof(int), compare_factors );
         sum += element->get_weight() * element->compute_mean_skip_factor();
         tasks++;
     }
     if( running ) {
+        qsort( running->skip_factors.data(), running->skip_factors.size(), sizeof(double), compare_members );
         sum += running->get_weight() * running->compute_mean_skip_factor();
         tasks++;
     }
