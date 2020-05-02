@@ -128,6 +128,11 @@ void Task::set_weight( double weight )
     this->weight = weight;
 }
 
+void Task::set_max_instances( int number )
+{
+    this->max_instances = number;
+}
+
 // TODO staviti sve gettere const
 int Task::get_id()
 {
@@ -203,6 +208,12 @@ int Task::get_curr_skip_value()
 {
     return this->current_skip_value;
 }
+
+int Task::get_max_instances()
+{
+    return this->max_instances;
+}
+
 
 void Task::initialize_task() 
 {
@@ -285,13 +296,12 @@ void Task::reset_skip_value()
     this->current_skip_value = 0;
 }
 
-double Task::compute_mean_skip_factor()
-{
-    if( skip_factors.empty() ) {
+double Task::compute_mean_skip_factor() {
+    if (skip_factors.empty()) {
         return 0;
     }
     double sum = 0;
-    for( auto & element : skip_factors ) {
+    for (auto &element : skip_factors) {
         sum += element;
     }
     return sum / static_cast<double>( skip_factors.size() );

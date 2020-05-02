@@ -62,7 +62,7 @@ void Simulator<T>::run()
     missed = 0;
     completed = 0;
     total_tardiness = 0;
-    int all_tasks = 0;
+    all_tasks = 0;
 	abs_time = 0;
 	running = nullptr;
 
@@ -243,10 +243,58 @@ void Simulator<T>::run()
             missed++;
         }
 	}
+	qos = static_cast<double>( completed ) / static_cast<double>( all_tasks );
 }
 
 template <typename T>
 double Simulator<T>::compute_skip_fitness()
+{
+    double sum = 0;
+    int tasks = 0;
+    for( auto & element : pending ) {
+        qsort( element->skip_factors.data(), element->skip_factors.size(), sizeof(int), compare_factors );
+        sum += element->get_weight() * element->compute_mean_skip_factor() / static_cast<double>( element->get_max_instances() );
+        tasks++;
+    }
+    for( auto & element : ready ) {
+        qsort( element->skip_factors.data(), element->skip_factors.size(), sizeof(int), compare_factors );
+        sum += element->get_weight() * element->compute_mean_skip_factor() / static_cast<double>( element->get_max_instances() );
+        tasks++;
+    }
+    if( running ) {
+        qsort( running->skip_factors.data(), running->skip_factors.size(), sizeof(int), compare_factors );
+        sum += running->get_weight() * running->compute_mean_skip_factor() / static_cast<double>( running->get_max_instances() );
+        tasks++;
+    }
+    return sum / static_cast<double>( tasks );
+}
+
+template <typename T>
+double Simulator<T>::compute_deviation()
+{
+    double dev = 0;
+    std::vector<double> factors;
+
+    for( auto & element : pending ) {
+        factors.push_back( element->compute_mean_skip_factor()/ static_cast<double>( element->get_max_instances() ));
+    }
+    for( auto & element : ready ) {
+        factors.push_back( element->compute_mean_skip_factor()/ static_cast<double>( element->get_max_instances() ));
+    }
+    if( running ) {
+        factors.push_back( running->compute_mean_skip_factor()/ static_cast<double>( running->get_max_instances() ));
+    }
+    qsort( factors.data(), factors.size(), sizeof(double), compare_members );
+
+    dev = ( factors[0] - factors[factors.size() - 1] ) / factors.size();
+
+    assert( dev >= 0 );
+
+    return dev;
+}
+
+template <typename T>
+void Simulator<T>::display_info()
 {
     double sum = 0;
     int tasks = 0;
@@ -261,33 +309,53 @@ double Simulator<T>::compute_skip_fitness()
         tasks++;
     }
     if( running ) {
-        qsort( running->skip_factors.data(), running->skip_factors.size(), sizeof(double), compare_members );
+        qsort( running->skip_factors.data(), running->skip_factors.size(), sizeof(int), compare_factors );
         sum += running->get_weight() * running->compute_mean_skip_factor();
         tasks++;
     }
-    return sum / static_cast<double>( tasks );
-}
+    mean_skip_factor = sum / static_cast<double>( tasks );
 
-template <typename T>
-double Simulator<T>::compute_deviation()
-{
+    printf( "mean skip factor:\t%lf\n", mean_skip_factor );
+
     double dev = 0;
     std::vector<double> factors;
 
     for( auto & element : pending ) {
-        factors.push_back( element->compute_mean_skip_factor() );
+        factors.push_back( element->compute_mean_skip_factor() / static_cast<double>( element->get_max_instances() ));
     }
     for( auto & element : ready ) {
-        factors.push_back( element->compute_mean_skip_factor() );
+        factors.push_back( element->compute_mean_skip_factor() / static_cast<double>( element->get_max_instances() ));
     }
     if( running ) {
-        factors.push_back( running->compute_mean_skip_factor() );
+        factors.push_back( running->compute_mean_skip_factor() / static_cast<double>( running->get_max_instances() ));
     }
     qsort( factors.data(), factors.size(), sizeof(double), compare_members );
 
     dev = ( factors[0] - factors[factors.size() - 1] ) / factors.size();
 
-    assert( dev >= 0 );
+    printf( "mean deviation:\t%lf\n", dev );
+    printf( "QoS:\t%lf\n", static_cast<double>( this->completed ) / static_cast<double>( this->all_tasks ) );
+}
 
-    return dev;
+template <typename T>
+void Simulator<T>::compute_mean_skip_factor()
+{
+    double sum = 0;
+    int tasks = 0;
+    for( auto & element : pending ) {
+        qsort( element->skip_factors.data(), element->skip_factors.size(), sizeof(int), compare_factors );
+        sum += element->get_weight() * element->compute_mean_skip_factor();
+        tasks++;
+    }
+    for( auto & element : ready ) {
+        qsort( element->skip_factors.data(), element->skip_factors.size(), sizeof(int), compare_factors );
+        sum += element->get_weight() * element->compute_mean_skip_factor();
+        tasks++;
+    }
+    if( running ) {
+        qsort( running->skip_factors.data(), running->skip_factors.size(), sizeof(int), compare_factors );
+        sum += running->get_weight() * running->compute_mean_skip_factor();
+        tasks++;
+    }
+    mean_skip_factor = sum / static_cast<double>( tasks );
 }

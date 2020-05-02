@@ -23,10 +23,6 @@ public:
 	void set_overload( double overload ) {
 	    this->overload_factor = overload;
 	}
-	double get_hyperperiod()
-    {
-	    return hyperperiod;
-    }
     void compute_overloaded( std::vector<Task *> &test_tasks, std::vector<double > init );
 
 private:

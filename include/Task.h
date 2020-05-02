@@ -40,6 +40,7 @@ class Task {
         int get_skip_factor();
         double get_arrival_time() const;
         int get_curr_skip_value();
+        int get_max_instances();
 
         void set_arrival_time();
         void set_abs_dd();
@@ -54,6 +55,7 @@ class Task {
         void set_curr_skip_value( int value );
         void set_duration( double duration );
         void set_weight( double weight );
+        void set_max_instances( int number );
 
         void initialize_task();
 
@@ -103,6 +105,7 @@ class Task {
             this->skip_factors = task->skip_factors;
             this->weight = task->weight;
             this->priority = task->priority;
+            this->max_instances = task->max_instances;
         }
 
         ~Task() = default;
@@ -128,6 +131,7 @@ class Task {
         double time_started;
         state_t state;
         int current_skip_value;
+        int max_instances;
 };
 #endif 
 

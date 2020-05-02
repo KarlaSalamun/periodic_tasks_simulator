@@ -28,6 +28,7 @@ public:
 		abs_time = 0;
 		missed = 0;
 		completed = 0;
+		all_tasks = 0;
 		idle = false;
 		running = nullptr;
 	}
@@ -64,9 +65,17 @@ public:
 	std::vector<double> get_idle_time_vector() {
 	    return idle_time_vector;
 	}
+	double get_qos() {
+	    return qos;
+	}
+	double get_mean_skip_factor() {
+	    return mean_skip_factor;
+	}
 
     double compute_deviation();
 	double compute_skip_fitness();
+    void display_info();
+    void compute_mean_skip_factor();
 
 private:
 	//TODO: clanovi mogu biti unique_ptr
@@ -81,17 +90,22 @@ private:
 	double abs_time;
 	int missed;
 	int completed;
+	int all_tasks;
 	double total_tardiness;
 	T heuristic;
 	bool GPScheduling;
 	bool idle;
+	double total_skip_factor;
 	std::vector<double> deadline_vector;
 	std::vector<double> idle_time_vector;
+	double qos;
+	double mean_skip_factor;
 
 	void initialize_tasks()
 	{
 		for( auto & element : pending ) {
 			element->initialize_task();
+			element->set_max_instances( floor( tc->get_hyperperiod() / element->get_period() ) );
 		}
 	}
 };

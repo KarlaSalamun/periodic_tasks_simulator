@@ -33,6 +33,10 @@ class TaskCreator {
         {
             this->filename = filename;
         }
+        double get_hyperperiod()
+        {
+            return hyperperiod;
+        }
 
         virtual void create_test_set( std::vector<Task *> &test_tasks );
         void write_tasks( std::vector<Task *>  &test_tasks );
