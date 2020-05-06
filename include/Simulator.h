@@ -44,9 +44,10 @@ public:
     {
 	    return missed;
     }
-    void set_heuristic( T heur )
+    void set_heuristic( std::pair<T, T> heur )
     {
-	    this->heuristic = heur;
+	    this->priority_heuristic = heur.first;
+	    this->acceptance_heuristic = heur.second;
     }
     void set_finish_time( double time )
     {
@@ -98,7 +99,8 @@ private:
 	int completed;
 	int all_tasks;
 	double total_tardiness;
-	T heuristic;
+	T priority_heuristic;
+	T acceptance_heuristic;
 	bool GPScheduling;
 	bool idle;
 	double total_skip_factor;
