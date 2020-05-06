@@ -21,8 +21,8 @@ public:
 template <typename T>
 class Simulator {
 public:
-	Simulator( double time_slice, double finish_time, TaskCreator *tc, Scheduler *sched, bool GPSched ) :
-		time_slice( time_slice ), finish_time( finish_time ), tc( tc ), sched( sched ), GPScheduling( GPSched )
+	Simulator( double time_slice, double finish_time, TaskCreator *tc, Scheduler *sched, bool GPSched, bool display_sched ) :
+		time_slice( time_slice ), finish_time( finish_time ), tc( tc ), sched( sched ), GPScheduling( GPSched ), display_sched( display_sched )
 	{
 		tc->set_time_slice( time_slice );
 		abs_time = 0;
@@ -71,6 +71,12 @@ public:
 	double get_mean_skip_factor() {
 	    return mean_skip_factor;
 	}
+	void set_display() {
+	    display_sched = true;
+	}
+	void set_filename( std::string filename ) {
+	    this->filename = filename;
+	}
 
     double compute_deviation();
 	double compute_skip_fitness();
@@ -100,6 +106,8 @@ private:
 	std::vector<double> idle_time_vector;
 	double qos;
 	double mean_skip_factor;
+	std::string filename;
+	bool display_sched;
 
 	void initialize_tasks()
 	{

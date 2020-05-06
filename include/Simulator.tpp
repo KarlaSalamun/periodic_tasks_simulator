@@ -35,7 +35,6 @@ static int compare_factors(const void *m1, const void *m2)
     }
 }
 
-
 template <typename T>
 void Simulator<T>::load()
 {
@@ -65,6 +64,10 @@ void Simulator<T>::run()
     all_tasks = 0;
 	abs_time = 0;
 	running = nullptr;
+	FILE *fd = fopen( filename.c_str(), "w+" );
+	if( display_sched ) {
+	    fprintf( fd, "\\begin{RTGrid}[width=15cm]{%zu}{%d}\n", pending.size(), static_cast<int>( tc->get_hyperperiod() ));
+	}
 
 	while( abs_time < finish_time ) {
 		std::vector<Task *>::iterator it;
@@ -107,6 +110,8 @@ void Simulator<T>::run()
 			assert( (*it)->get_abs_due_date() > 0 );
 			
 			if ( (*it)->isReady( abs_time ) ) {
+			    if( display_sched )
+			        fprintf( fd, "\t\\TaskArrDead{%d}{%d}{%d}\n", (*it)->get_id()+1, static_cast<int>( abs_time ), static_cast<int>( (*it)->get_period() ) );
 			    all_tasks++;
 //				printf( "task %d is ready!\n", (*it)->get_id() );
 				ready.push_back( std::move( *it ) );
@@ -182,7 +187,9 @@ void Simulator<T>::run()
                 }
             }
 			sched->schedule_next( ready, running, abs_time );
-		}
+            if( display_sched )
+                fprintf( fd, "\t\\TaskExecDelta{%d}{%d}{%d}\n", (*it)->get_id()+1, static_cast<int>( abs_time ), static_cast<int>( time_slice ));
+        }
 
 		abs_time += time_slice;
 //		if( running )
@@ -243,6 +250,10 @@ void Simulator<T>::run()
             missed++;
         }
 	}
+    if( display_sched ) {
+        fprintf( fd, "\\end{RTGrid}\n" );
+        fclose( fd );
+    }
 	qos = static_cast<double>( completed ) / static_cast<double>( all_tasks );
 }
 
