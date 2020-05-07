@@ -64,7 +64,6 @@ void Simulator<T>::run()
     all_tasks = 0;
 	abs_time = 0;
 	running = nullptr;
-    std::vector<Task *> accepted;
 
 	FILE *fd = fopen( filename.c_str(), "w+" );
 	if( display_sched ) {
@@ -99,22 +98,6 @@ void Simulator<T>::run()
                 (*it)->reset_skip_value();
                 pending.push_back(std::move(*it));
                 it = ready.erase(it);
-                missed++;
-            } else {
-                it++;
-            }
-        }
-
-        it = accepted.begin();
-        while( it != accepted.end() ) {
-            if ((*it)->is_next_instance(abs_time)) {
-                (*it)->inc_instance();
-                (*it)->update_params();
-                (*it)->reset_remaining();
-                (*it)->skip_factors.push_back( (*it)->get_curr_skip_value() );
-                (*it)->reset_skip_value();
-                pending.push_back(std::move(*it));
-                it = accepted.erase(it);
                 missed++;
             } else {
                 it++;
@@ -160,17 +143,19 @@ void Simulator<T>::run()
 
         it = ready.begin();
         while( it != ready.end() ) {
-            if ((*it)->get_priority() > 0 ) {
-                accepted.push_back( *it );
+            if ((*it)->get_priority() <= 0 ) {
+                (*it)->inc_instance();
+                (*it)->update_params();
+                (*it)->reset_remaining();
+                (*it)->skip_factors.push_back( (*it)->get_curr_skip_value() );
+                (*it)->reset_skip_value();
+                pending.push_back( *it );
                 ready.erase( it );
+                missed++;
             }
             else {
                 it++;
             }
-        }
-
-        if( !ready.empty() ) {
-            printf( "job is not accepted\n" );
         }
 
         if( !running ) {
@@ -193,23 +178,23 @@ void Simulator<T>::run()
             }
         }
 
-		if( !accepted.empty() ) {
+		if( !ready.empty() ) {
 			if( GPScheduling ) {
 			    tmp_pending.clear();
                 tmp_processed.clear();
                 tctx.processed.clear();
 
-                it = accepted.begin();
-                while( it != accepted.end() ) {
+                it = ready.begin();
+                while( it != ready.end() ) {
                     tctx.pending.clear();
                     tmp = std::move( *it );
                     tctx.task = tmp;
-                    it = accepted.erase( it );
-                    std::copy( accepted.begin(), accepted.end(), std::back_inserter( tctx.pending ) );
+                    it = ready.erase( it );
+                    std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.pending ) );
                     priority_heuristic->execute( &tctx );
                     tctx.processed.push_back( std::move( tmp ) );
                 }
-                std::copy( tctx.processed.begin(), tctx.processed.end(), std::back_inserter( accepted ) );
+                std::copy( tctx.processed.begin(), tctx.processed.end(), std::back_inserter( ready ) );
 			}
             else { // EDF scheduling
                 for( size_t i=0; i<ready.size(); i++ ) {
@@ -217,7 +202,7 @@ void Simulator<T>::run()
                     // printf( "%d: %f\n", ready[i]->id, ready[i]->priority );
                 }
             }
-			sched->schedule_next( accepted, running, abs_time );
+			sched->schedule_next( ready, running, abs_time );
             if( display_sched )
                 fprintf( fd, "\t\\TaskExecDelta{%d}{%d}{%d}\n", (*it)->get_id()+1, static_cast<int>( abs_time ), static_cast<int>( time_slice ));
         }
@@ -253,8 +238,6 @@ void Simulator<T>::run()
 			}
 		}
 	}
-
-	std::copy( accepted.begin(), accepted.end(), std::back_inserter( ready ) );
 
 	if( idle ) {
 	    deadline_vector.push_back( start_idle );
