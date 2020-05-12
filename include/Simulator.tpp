@@ -7,7 +7,7 @@
 
 static int compare_members(const void *m1, const void *m2)
 {
-    if (*(double*)m1 > *(double*)m2) {
+    if (*(double*)m1 > *(double*)m2) { // TODO ne smije se castati const u non-const
         return -1;
     }
 
