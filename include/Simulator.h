@@ -72,6 +72,9 @@ public:
 	double get_mean_skip_factor() {
 	    return mean_skip_factor;
 	}
+	double get_time_wasted() {
+        return wasted_time;
+	}
 	void set_display() {
 	    display_sched = true;
 	}
@@ -110,6 +113,7 @@ private:
 	double mean_skip_factor;
 	std::string filename;
 	bool display_sched;
+	double wasted_time;
 
 	void initialize_tasks()
 	{

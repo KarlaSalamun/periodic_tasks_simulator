@@ -63,6 +63,7 @@ void Simulator<T>::run()
     total_tardiness = 0;
     all_tasks = 0;
 	abs_time = 0;
+	wasted_time = 0;
 	running = nullptr;
 
 	FILE *fd = fopen( filename.c_str(), "w+" );
@@ -77,6 +78,7 @@ void Simulator<T>::run()
         if( running ) {
             if( abs_time == running->get_abs_due_date() and
                 std::isgreater( running->get_remaining(), 0  )  ) {
+                wasted_time += running->get_duration() - running->get_remaining();
                 running->inc_instance();
                 running->update_params();
                 running->reset_remaining();
@@ -143,7 +145,7 @@ void Simulator<T>::run()
 
         it = ready.begin();
         while( it != ready.end() ) {
-            if ((*it)->get_priority() <= 0 ) {
+            if ((*it)->get_priority() > 0 ) {
                 (*it)->inc_instance();
                 (*it)->update_params();
                 (*it)->reset_remaining();
