@@ -106,24 +106,55 @@ void Simulator<T>::run()
         it = pending.begin();
         while( it != pending.end() ) {
 
-			assert( (*it)->get_period() );
-			assert( (*it)->get_abs_due_date() > 0 );
-			
-			if ( (*it)->isReady( abs_time ) ) {
-			    if( display_sched )
-			        fprintf( fd, "\t\\TaskArrDead{%d}{%d}{%d}\n", (*it)->get_id()+1, static_cast<int>( abs_time ), static_cast<int>( (*it)->get_period() ) );
-			    all_tasks++;
-//				printf( "task %d is ready!\n", (*it)->get_id() );
-				ready.push_back( std::move( *it ) );
-				it = pending.erase( it );
-			}
-			else {
-				it++;
-			}
-		}
+            assert( (*it)->get_period() );
+            assert( (*it)->get_abs_due_date() > 0 );
 
-        for( auto & element : pending ) {
-            assert( element->get_arrival_time() > abs_time );
+            if ( (*it)->isReady( abs_time ) ) {
+                if( display_sched )
+                    fprintf( fd, "\t\\TaskArrDead{%d}{%d}{%d}\n", (*it)->get_id()+1, static_cast<int>( abs_time ), static_cast<int>( (*it)->get_period() ) );
+                all_tasks++;
+//				printf( "task %d is ready!\n", (*it)->get_id() );
+                ready.push_back( std::move( *it ) );
+                it = pending.erase( it );
+            }
+            else {
+                it++;
+            }
+        }
+
+        std::vector<Task *> tmp_pending;
+        std::vector<Task *> tmp_processed;
+        tctx.processed.clear();
+
+//                std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.pending ) );
+        it = ready.begin();
+        Task *tmp = new Task();
+        while( it != ready.end() ) {
+            tctx.pending.clear();
+            tmp = std::move( *it );
+            tctx.task = tmp;
+            it = ready.erase( it );
+            std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.pending ) );
+            this->acceptance_heuristic->execute( &tctx );
+            tctx.processed.push_back( std::move( tmp ) );
+        }
+        std::copy( tctx.processed.begin(), tctx.processed.end(), std::back_inserter( ready ) );
+
+        it = ready.begin();
+        while( it != ready.end() ) {
+            if ((*it)->get_priority() > 0 ) {
+                (*it)->inc_instance();
+                (*it)->update_params();
+                (*it)->reset_remaining();
+                (*it)->skip_factors.push_back( (*it)->get_curr_skip_value() );
+                (*it)->reset_skip_value();
+                pending.push_back( *it );
+                ready.erase( it );
+                missed++;
+            }
+            else {
+                it++;
+            }
         }
 
         if( !running ) {
@@ -146,102 +177,86 @@ void Simulator<T>::run()
             }
         }
 
-		if( !ready.empty() ) {
-//			printf( "scheduling tasks : " );
-//			for( auto & element : ready ) {
-//				printf( "%d ", element->get_id() );
-//			}
-//			printf( "\n" );
-
-			if( GPScheduling ) {
-			    std::vector<Task *> tmp_pending;
-			    std::vector<Task *> tmp_processed;
+        if( !ready.empty() ) {
+            if( GPScheduling ) {
+                tmp_pending.clear();
+                tmp_processed.clear();
                 tctx.processed.clear();
 
-//                std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.pending ) );
                 it = ready.begin();
-                Task *tmp = new Task();
                 while( it != ready.end() ) {
                     tctx.pending.clear();
                     tmp = std::move( *it );
                     tctx.task = tmp;
                     it = ready.erase( it );
                     std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.pending ) );
-                    heuristic->execute( &tctx );
+                    priority_heuristic->execute( &tctx );
                     tctx.processed.push_back( std::move( tmp ) );
                 }
                 std::copy( tctx.processed.begin(), tctx.processed.end(), std::back_inserter( ready ) );
-
-                /*
-                for( auto & element : ready ) {         // TODO: staviti pointer na vektore u tctx
-                    tctx.task = element;
-                    heuristic->execute( &tctx );
-                    element->set_priority( tctx.task->get_priority() );
-                }
-                 */
-			}
+            }
             else { // EDF scheduling
                 for( size_t i=0; i<ready.size(); i++ ) {
                     ready[i]->update_priority( abs_time );
                     // printf( "%d: %f\n", ready[i]->id, ready[i]->priority );
                 }
             }
-			sched->schedule_next( ready, running, abs_time );
+            sched->schedule_next( ready, running, abs_time );
             if( display_sched )
                 fprintf( fd, "\t\\TaskExecDelta{%d}{%d}{%d}\n", (*it)->get_id()+1, static_cast<int>( abs_time ), static_cast<int>( time_slice ));
         }
 
-		abs_time += time_slice;
+        abs_time += time_slice;
 //		if( running )
 //            printf( "task %d is running, %f remaining\n", running->get_id(), running->get_remaining() );
 
 //        printf( "\ntime: %f\n\n", abs_time );
 
-		if( running ) {
-		    idle = false;
-			if( running->isFinished() ) {
+        if( running ) {
+            idle = false;
+            if( running->isFinished() ) {
 //				printf( "task %d is finished!\n", running->get_id() );
-				running->update_tardiness( abs_time );
-				running->reset_remaining();
-				completed++;
-				running->inc_instance();
-				running->update_params();
-				running->inc_skip_value();
-				running->isPreempted = false;
+                running->update_tardiness( abs_time );
+                running->reset_remaining();
+                completed++;
+                running->inc_instance();
+                running->update_params();
+                running->inc_skip_value();
+                running->isPreempted = false;
 //				if( islessequal( running->get_arrival_time(), abs_time ) ) {
 //				    ready.push_back( std::move( running ) );
 //				}
 //				else {
-                    pending.push_back( std::move( running ) );
+                pending.push_back( std::move( running ) );
 //				}
-				running = nullptr;
-			}
-			else {
-				running->update_remaining();
+                running = nullptr;
+            }
+            else {
+                running->update_remaining();
 //				printf("remaining time: %f\n", running->get_remaining() );
-			}
-		}
-	}
-
-	if( idle ) {
-	    deadline_vector.push_back( start_idle );
-	    idle_time_vector.push_back( tmp_idle + time_slice );
-	}
-
-	for( auto & element : pending ) {
-//		printf( "%d tardiness: %f\n", element->get_id(), element->get_tardiness() );
-		total_tardiness += element->get_tardiness();
-		element->skip_factors.push_back( element->get_curr_skip_value() );
+            }
+        }
     }
-	for( auto & element : ready ) {
+
+    if( idle ) {
+        deadline_vector.push_back( start_idle );
+        idle_time_vector.push_back( tmp_idle + time_slice );
+    }
+
+    for( auto & element : pending ) {
+//		printf( "%d tardiness: %f\n", element->get_id(), element->get_tardiness() );
+        total_tardiness += element->get_tardiness();
+        element->skip_factors.push_back( element->get_curr_skip_value() );
+    }
+    for( auto & element : ready ) {
 //		printf( "%d tardiness: %f\n", element->get_id(), element->get_tardiness() );
         total_tardiness += element->get_tardiness();
         if( element->get_arrival_time() < abs_time ) {
             missed++;
             element->skip_factors.push_back( element->get_curr_skip_value() );
         }
-	}
-	if( running ) {
+    }
+    if( running ) {
 //		printf( "%d tardiness: %f\n", running->get_id(), running->get_tardiness() );
         total_tardiness += running->get_tardiness();
         if( abs_time == running->get_abs_due_date() and
@@ -249,12 +264,12 @@ void Simulator<T>::run()
             running->skip_factors.push_back( running->get_curr_skip_value() );
             missed++;
         }
-	}
+    }
     if( display_sched ) {
         fprintf( fd, "\\end{RTGrid}\n" );
         fclose( fd );
     }
-	qos = static_cast<double>( completed ) / static_cast<double>( all_tasks );
+    qos = static_cast<double>( completed ) / static_cast<double>( all_tasks );
 }
 
 template <typename T>
