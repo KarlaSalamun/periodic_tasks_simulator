@@ -5,7 +5,7 @@
 #include <cassert>
 #include "Simulator.h"
 
-static int compare_members(const void *m1, const void *m2)
+static inline int compare_members(const void *m1, const void *m2)
 {
     if (*(double*)m1 > *(double*)m2) { // TODO ne smije se castati const u non-const
         return -1;
@@ -47,9 +47,6 @@ void Simulator<T>::create()
 {
 	tc->create_test_set( pending );
 	initialize_tasks();
-	for( auto & element : pending ) {
-	    element->set_weight( 1 );
-	}
 	tc->write_tasks( pending );
 }
 
@@ -73,37 +70,21 @@ void Simulator<T>::run()
 	while( abs_time < finish_time ) {
 		std::vector<Task *>::iterator it;
 
-		// abort running task if about to miss deadline
-        if( running ) {
-            if( abs_time == running->get_abs_due_date() and
-                std::isgreater( running->get_remaining(), 0  )  ) {
-                wasted_time += running->get_duration() - running->get_remaining();
-                running->inc_instance();
-                running->update_params();
-                running->reset_remaining();
-                running->skip_factors.push_back( running->get_curr_skip_value() );
-                running->reset_skip_value();
-                pending.push_back( std::move( running ) );
-                running = nullptr;
-                missed++;
-            }
-        }
-
-        it = ready.begin();
-        while( it != ready.end() ) {
-            if ((*it)->is_next_instance(abs_time)) {
-                (*it)->inc_instance();
-                (*it)->update_params();
-                (*it)->reset_remaining();
-                (*it)->skip_factors.push_back( (*it)->get_curr_skip_value() );
-                (*it)->reset_skip_value();
-                pending.push_back(std::move(*it));
-                it = ready.erase(it);
-                missed++;
-            } else {
-                it++;
-            }
-        }
+//        it = ready.begin();
+//        while( it != ready.end() ) {
+//            if ((*it)->is_next_instance(abs_time)) {
+//                (*it)->inc_instance();
+//                (*it)->update_params();
+//                (*it)->reset_remaining();
+//                (*it)->skip_factors.push_back( (*it)->get_curr_skip_value() );
+//                (*it)->reset_skip_value();
+//                pending.push_back(std::move(*it));
+//                it = ready.erase(it);
+//                missed++;
+//            } else {
+//                it++;
+//            }
+//        }
 
         it = pending.begin();
         while( it != pending.end() ) {
@@ -232,12 +213,12 @@ void Simulator<T>::run()
 
 	for( auto & element : pending ) {
 //		printf( "%d tardiness: %f\n", element->get_id(), element->get_tardiness() );
-		total_tardiness += element->get_tardiness();
+		total_tardiness += element->get_tardiness() * element->get_weight();
 		element->skip_factors.push_back( element->get_curr_skip_value() );
     }
 	for( auto & element : ready ) {
 //		printf( "%d tardiness: %f\n", element->get_id(), element->get_tardiness() );
-        total_tardiness += element->get_tardiness();
+        total_tardiness += element->get_tardiness() * element->get_weight();
         if( element->get_arrival_time() < abs_time ) {
             missed++;
             element->skip_factors.push_back( element->get_curr_skip_value() );
@@ -245,7 +226,7 @@ void Simulator<T>::run()
 	}
 	if( running ) {
 //		printf( "%d tardiness: %f\n", running->get_id(), running->get_tardiness() );
-        total_tardiness += running->get_tardiness();
+        total_tardiness += running->get_tardiness() * running->get_weight();
         if( abs_time == running->get_abs_due_date() and
             std::isgreater( running->get_remaining(), 0  )  ) {
             running->skip_factors.push_back( running->get_curr_skip_value() );

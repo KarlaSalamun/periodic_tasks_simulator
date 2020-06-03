@@ -226,7 +226,6 @@ void Task::initialize_task()
 	isPreempted = false;
 	tardiness = 0;
 	skip_factors.clear();
-	weight = 1;
 }
 
 bool Task::is_missed( double time )
