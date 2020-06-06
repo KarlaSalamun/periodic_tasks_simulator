@@ -15,7 +15,7 @@ double Task::compute_tardiness( double time )
  
 void Task::write_task(FILE *fd)
 {
-	assert(fprintf( fd, "%d %f %f %f \n", id, phase, period, duration ) > 0);
+	assert(fprintf( fd, "%d %f %zu %zu \n", id, phase, period, duration ) > 0);
 }
 
 void Task::set_arrival_time()
@@ -38,7 +38,7 @@ bool Task::isReady( double time )
 
 bool Task::isFinished() 
 {
-	return std::islessequal( fabs(remaining), time_slice );
+	return remaining <= time_slice;
 }
 
 void Task::update_tardiness( double time )
@@ -219,7 +219,7 @@ void Task::initialize_task()
 {
 	arrival_time = phase;
 	instance = 1;
-	current_skip_value = 0;
+	current_skip_value = 1;
 	set_abs_dd();
 	remaining = duration;
 	state = RED;
@@ -293,7 +293,7 @@ void Task::inc_skip_value()
 
 void Task::reset_skip_value()
 {
-    this->current_skip_value = 0;
+    this->current_skip_value = 1;
 }
 
 double Task::compute_mean_skip_factor() {

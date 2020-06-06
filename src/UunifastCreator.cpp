@@ -8,17 +8,19 @@ void UunifastCreator::create_test_set( std::vector<Task *> &test_tasks )
     test_tasks.resize( task_number );
     mean_u = overload_factor;
     std::vector<double> u_values = generate_utils();
-    convert( u_values );
+//    convert( u_values );
     std::vector<double> T_values = generate_log_uniform();
 
     for( size_t i=0; i<test_tasks.size(); i++ ) {
     	period = T_values[i];
     	double phase = 0;
 //        convert( u_values );
-    	duration = u_values[i] * T_values[i];
-        printf( "%f\n", duration );
-        period *= 10;
+    	duration = floor( u_values[i] * T_values[i] );
+    	if( duration == 0 ) {
+    	    duration = 1;
+    	}
         test_tasks[i] = std::move( new Task( phase, 1, period, period, i, time_slice, duration ) );
+        test_tasks[i]->set_weight( 1 );
     }
 }
 

@@ -70,6 +70,11 @@ void Simulator<T>::run()
 	    fprintf( fd, "\\begin{RTGrid}[width=15cm]{%zu}{%d}\n", pending.size(), static_cast<int>( tc->get_hyperperiod() ));
 	}
 
+	for( auto & element : pending ) {
+	    element->initialize_task();
+	    element->set_max_instances( finish_time / element->get_period() );
+	}
+
 	while( abs_time < finish_time ) {
 		std::vector<Task *>::iterator it;
 
