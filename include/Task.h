@@ -116,19 +116,19 @@ class Task {
     private:
         double phase;
         int instance;
-        double period;
-        double rel_due_date;
+        size_t period;
+        size_t rel_due_date;
         int id;
-        double time_slice;
+        size_t time_slice;
         double weight;
-        double arrival_time;
-        double duration;
+        size_t arrival_time;
+        size_t duration;
         int skip_factor;
-        double abs_due_date;
+        size_t abs_due_date;
         double priority;
-        double tardiness;
-        double remaining;
-        double time_started;
+        size_t tardiness;
+        size_t remaining;
+        size_t time_started;
         state_t state;
         int current_skip_value;
         int max_instances;

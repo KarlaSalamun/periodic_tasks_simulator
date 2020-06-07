@@ -86,6 +86,7 @@ public:
 	double compute_skip_fitness();
     void display_info();
     void compute_mean_skip_factor();
+    double compute_gini_coeff();
 
 private:
 	//TODO: clanovi mogu biti unique_ptr

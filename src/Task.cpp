@@ -38,7 +38,7 @@ bool Task::isReady( double time )
 
 bool Task::isFinished() 
 {
-	return std::islessequal( fabs(remaining), time_slice );
+	return remaining <= 1;
 }
 
 void Task::update_tardiness( double time )
@@ -55,7 +55,7 @@ void Task::inc_instance()
 
 void Task::update_remaining()
 {
-	remaining -= time_slice;
+	remaining -= 1;
 }
 
 // void Task::set_period( double period )
@@ -304,5 +304,6 @@ double Task::compute_mean_skip_factor() {
     for (auto &element : skip_factors) {
         sum += element;
     }
+    assert( sum == sum );
     return sum / static_cast<double>( skip_factors.size() );
 }

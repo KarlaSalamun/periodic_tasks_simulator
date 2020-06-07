@@ -65,6 +65,11 @@ void Simulator<T>::run()
 	abs_time = 0;
 	wasted_time = 0;
 	running = nullptr;
+	ready.clear();
+
+	for( auto & element : pending ) {
+	    element->set_max_instances( finish_time / element->get_period() );
+	}
 
 	FILE *fd = fopen( filename.c_str(), "w+" );
 	if( display_sched ) {
@@ -273,6 +278,11 @@ void Simulator<T>::run()
         fclose( fd );
     }
 	qos = static_cast<double>( completed ) / static_cast<double>( all_tasks );
+    if( running )
+        pending.push_back( std::move( running ) );
+
+    if( !ready.empty() )
+        std::copy( ready.begin(), ready.end(), std::back_inserter( pending ) );
 }
 
 template <typename T>
@@ -280,6 +290,7 @@ double Simulator<T>::compute_skip_fitness()
 {
     double sum = 0;
     int tasks = 0;
+    double fitness;
     for( auto & element : pending ) {
         qsort( element->skip_factors.data(), element->skip_factors.size(), sizeof(int), compare_factors );
         sum += element->get_weight() * element->compute_mean_skip_factor() / static_cast<double>( element->get_max_instances() );
@@ -295,7 +306,9 @@ double Simulator<T>::compute_skip_fitness()
         sum += running->get_weight() * running->compute_mean_skip_factor() / static_cast<double>( running->get_max_instances() );
         tasks++;
     }
-    return sum / static_cast<double>( tasks );
+    fitness = sum / static_cast<double >( tasks );
+    assert( fitness == fitness );
+    return  fitness;
 }
 
 template <typename T>
@@ -386,5 +399,26 @@ void Simulator<T>::compute_mean_skip_factor()
         sum += running->get_weight() * running->compute_mean_skip_factor();
         tasks++;
     }
+    assert( sum == sum );
     mean_skip_factor = sum / static_cast<double>( tasks );
+}
+
+
+template <typename T>
+double Simulator<T>::compute_gini_coeff()
+{
+    double sum = 0;
+    for( size_t  i=0; i<pending.size(); i++) {
+        for( size_t  j=0; j<pending.size(); j++) {
+            sum += fabs( pending[i]->compute_mean_skip_factor() - pending[j]->compute_mean_skip_factor() );
+        }
+    }
+    compute_mean_skip_factor();
+    if( mean_skip_factor == 0 ) {
+        return 0;
+    }
+    assert( sum == sum );
+    sum /= ( 2 * pow(static_cast<double>(pending.size()), 2 ) * mean_skip_factor );
+    assert( sum == sum );
+    return sum;
 }
