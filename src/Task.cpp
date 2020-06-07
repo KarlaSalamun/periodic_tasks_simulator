@@ -300,9 +300,14 @@ double Task::compute_mean_skip_factor() {
     if (skip_factors.empty()) {
         return 0;
     }
-    double sum = 0;
-    for (auto &element : skip_factors) {
-        sum += element;
+    double sum = skip_factors[0];
+    for( size_t i=1; i<skip_factors.size(); i++ ) {
+//        if( skip_factors[i] == 1 ) {
+//            if( skip_factors[i-1] == 1 ) {
+//                return 0;
+//            }
+//        }
+        sum += skip_factors[i];
     }
     return sum / static_cast<double>( skip_factors.size() );
 }

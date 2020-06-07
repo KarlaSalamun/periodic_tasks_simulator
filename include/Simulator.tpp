@@ -65,10 +65,7 @@ void Simulator<T>::run()
 	abs_time = 0;
 	wasted_time = 0;
 	running = nullptr;
-	FILE *fd = fopen( filename.c_str(), "w+" );
-	if( display_sched ) {
-	    fprintf( fd, "\\begin{RTGrid}[width=15cm]{%zu}{%d}\n", pending.size(), static_cast<int>( tc->get_hyperperiod() ));
-	}
+	ready.clear();
 
 	for( auto & element : pending ) {
 	    element->initialize_task();
@@ -118,7 +115,6 @@ void Simulator<T>::run()
 			
 			if ( (*it)->isReady( abs_time ) ) {
 			    if( display_sched )
-			        fprintf( fd, "\t\\TaskArrDead{%d}{%d}{%d}\n", (*it)->get_id()+1, static_cast<int>( abs_time ), static_cast<int>( (*it)->get_period() ) );
 			    all_tasks++;
 //				printf( "task %d is ready!\n", (*it)->get_id() );
 				ready.push_back( std::move( *it ) );
@@ -194,8 +190,7 @@ void Simulator<T>::run()
                 }
             }
 			sched->schedule_next( ready, running, abs_time );
-            if( display_sched )
-                fprintf( fd, "\t\\TaskExecDelta{%d}{%d}{%d}\n", (*it)->get_id()+1, static_cast<int>( abs_time ), static_cast<int>( time_slice ));
+
         }
 
 		abs_time += time_slice;
@@ -257,10 +252,7 @@ void Simulator<T>::run()
             missed++;
         }
 	}
-    if( display_sched ) {
-        fprintf( fd, "\\end{RTGrid}\n" );
-        fclose( fd );
-    }
+
 
 	qos = static_cast<double>( completed ) / static_cast<double>( all_tasks );
     if( running ) {
@@ -349,6 +341,9 @@ double Simulator<T>::compute_gini_coeff()
     double sum = 0;
     for( size_t  i=0; i<pending.size(); i++) {
         for( size_t  j=0; j<pending.size(); j++) {
+//            if( pending[i]->compute_mean_skip_factor() == 0 ) {
+//                return 1;
+//            }
             sum += fabs( pending[i]->compute_mean_skip_factor() - pending[j]->compute_mean_skip_factor() );
         }
     }
