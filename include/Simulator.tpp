@@ -114,9 +114,7 @@ void Simulator<T>::run()
 			assert( (*it)->get_abs_due_date() > 0 );
 			
 			if ( (*it)->isReady( abs_time ) ) {
-			    if( display_sched )
 			    all_tasks++;
-//				printf( "task %d is ready!\n", (*it)->get_id() );
 				ready.push_back( std::move( *it ) );
 				it = pending.erase( it );
 			}
@@ -270,7 +268,7 @@ double Simulator<T>::compute_skip_fitness()
     int tasks = 0;
     for( auto & element : pending ) {
         qsort( element->skip_factors.data(), element->skip_factors.size(), sizeof(int), compare_factors );
-        sum += element->get_weight() * element->compute_mean_skip_factor() / static_cast<double>( element->get_max_instances() );
+        sum += element->get_weight() * element->compute_mean_skip_factor() / ( element->skip_factors[element->skip_factors.size()-1] * element->skip_factors.size() );
         tasks++;
     }
     return sum / static_cast<double>( tasks );
