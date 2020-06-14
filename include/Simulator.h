@@ -81,6 +81,12 @@ public:
 	void set_filename( std::string filename ) {
 	    this->filename = filename;
 	}
+	int get_completed() {
+        return completed;
+	}
+	int get_total () {
+	    return all_tasks;
+	}
 
     double compute_deviation();
 	double compute_skip_fitness();

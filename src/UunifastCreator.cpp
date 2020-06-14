@@ -19,7 +19,7 @@ void UunifastCreator::create_test_set( std::vector<Task *> &test_tasks )
     	    duration = 1;
     	}
 //        printf( "%f\n", duration );
-        test_tasks[i] = std::move( new Task( phase, 1, period, period, i, time_slice, duration ) );
+        test_tasks[i] = new Task( phase, 1, period, period, i, time_slice, duration );
         test_tasks[i]->set_weight(1);
         test_tasks[i]->initialize_task();
     }
