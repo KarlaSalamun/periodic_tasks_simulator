@@ -136,10 +136,9 @@ void Simulator<T>::run()
 
 //                std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.pending ) );
         it = ready.begin();
-        Task *tmp = new Task();
         while( it != ready.end() ) {
             tctx.pending.clear();
-            tmp = std::move( *it );
+            Task *tmp = std::move( *it );
             tctx.task = tmp;
             it = ready.erase( it );
             std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.pending ) );
@@ -147,6 +146,8 @@ void Simulator<T>::run()
             tctx.processed.push_back( std::move( tmp ) );
         }
         std::copy( tctx.processed.begin(), tctx.processed.end(), std::back_inserter( ready ) );
+
+        bool ready_empty = ready.empty();
 
         it = ready.begin();
         while( it != ready.end() ) {
@@ -163,6 +164,9 @@ void Simulator<T>::run()
             else {
                 it++;
             }
+        }
+        if( !ready_empty && ready.empty() ) {
+            wasted_time += 1;
         }
 
         if( !running ) {
@@ -194,7 +198,7 @@ void Simulator<T>::run()
                 it = ready.begin();
                 while( it != ready.end() ) {
                     tctx.pending.clear();
-                    tmp = std::move( *it );
+                    Task *tmp = std::move( *it );
                     tctx.task = tmp;
                     it = ready.erase( it );
                     std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.pending ) );
