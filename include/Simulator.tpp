@@ -151,7 +151,7 @@ void Simulator<T>::run()
 
         it = ready.begin();
         while( it != ready.end() ) {
-            if ((*it)->get_priority() > 0 ) {
+            if ((*it)->get_priority() < 0 ) {
                 (*it)->inc_instance();
                 (*it)->update_params();
                 (*it)->reset_remaining();
