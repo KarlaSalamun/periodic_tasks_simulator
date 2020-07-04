@@ -161,11 +161,11 @@ void Simulator<T>::run()
 
 //                std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.pending ) );
                 it = ready.begin();
-                Task *tmp = new Task();
                 while( it != ready.end() ) {
                     tctx.pending.clear();
-                    tmp = std::move( *it );
+                    Task *tmp = std::move( *it );
                     tctx.task = tmp;
+                    tctx.time = abs_time;
                     it = ready.erase( it );
                     std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.pending ) );
                     heuristic->execute( &tctx );
@@ -268,9 +268,10 @@ double Simulator<T>::compute_skip_fitness()
     int tasks = 0;
     for( auto & element : pending ) {
         qsort( element->skip_factors.data(), element->skip_factors.size(), sizeof(int), compare_factors );
-        sum += element->get_weight() * element->compute_mean_skip_factor() / ( element->skip_factors[element->skip_factors.size()-1] * element->skip_factors.size() );
+        sum += element->get_weight() * element->compute_mean_skip_factor() / ( element->skip_factors[0] * element->skip_factors.size() );
         tasks++;
     }
+    assert( sum / static_cast<double>( tasks ) <= 1 );
     return sum / static_cast<double>( tasks );
 }
 
