@@ -114,9 +114,7 @@ void Simulator<T>::run()
 			assert( (*it)->get_abs_due_date() > 0 );
 			
 			if ( (*it)->isReady( abs_time ) ) {
-			    if( display_sched )
 			    all_tasks++;
-//				printf( "task %d is ready!\n", (*it)->get_id() );
 				ready.push_back( std::move( *it ) );
 				it = pending.erase( it );
 			}
