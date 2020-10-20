@@ -11,6 +11,7 @@ struct task_ctx {
     Task *task;
     std::vector<Task *> pending;
     std::vector<Task *> processed;
+    size_t time;
 };
 
 class Dummy {
