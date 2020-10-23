@@ -7,15 +7,19 @@ void Scheduler::schedule_next( std::vector<Task *> &ready, Task *&running, doubl
 	std::sort( ready.begin(), ready.end(), 
 		[]( const Task *a, const Task *b ) -> bool { return a->get_priority() < b->get_priority(); });
 
-	if( running ) {
+	preempted = false;
+	taskStarted = false;
+	if( running ) {		
 		if ( preempt( ready[0], running ) ) {
 //			printf( "task %d is preempted, ", running->get_id() );
 			running->isPreempted = true;
 //			printf( "remaining time %f\n", running->get_remaining() );
 			std::swap( ready[0], running );
+			preempted = true;
 		}
 	}
 	else {
+		taskStarted = true;
 		running = std::move( ready[0] );
 		ready.erase( ready.begin() );
 	}

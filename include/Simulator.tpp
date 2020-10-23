@@ -67,6 +67,19 @@ void Simulator<T>::run()
 	running = nullptr;
 	ready.clear();
 
+
+    FILE *fd;
+    if( display_sched ) {
+        fd = fopen( "../../test_outputs/schedule.tex", "w+" );
+        fprintf( fd, "\\begin{figure}[ht]\n" );
+        fprintf( fd, "\\begin{RTGrid}[width=10cm]{%d}{%d}\n", pending.size(), static_cast<int>(finish_time) );
+        for( auto & element : pending ) {
+            fprintf( fd, "\\multido{\\n=0+%d}{%d}{\n", static_cast<int>(element->get_period()), static_cast<int>( finish_time / element->get_period() ) );
+            fprintf( fd, "\t\\TaskArrDead{%d}{\\n}{%d}\n", element->get_id() + 1, static_cast<int>(element->get_period()) );
+            fprintf( fd, "}\n" );
+        }
+    }
+
 	for( auto & element : pending ) {
 	    element->initialize_task();
 	    element->set_max_instances( finish_time / element->get_period() );
@@ -85,6 +98,9 @@ void Simulator<T>::run()
                 running->reset_remaining();
                 running->skip_factors.push_back( running->get_curr_skip_value() );
                 running->reset_skip_value();
+                if( display_sched ) {
+                    fprintf( fd, "{%d}\n", abs_time );
+                }
                 pending.push_back( std::move( running ) );
                 running = nullptr;
                 missed++;
@@ -169,6 +185,7 @@ void Simulator<T>::run()
                     it = ready.erase( it );
                     std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.pending ) );
                     heuristic->execute( &tctx );
+                    assert( tctx.task->get_priority() == tctx.task->get_priority() );
                     tctx.processed.push_back( std::move( tmp ) );
                 }
                 std::copy( tctx.processed.begin(), tctx.processed.end(), std::back_inserter( ready ) );
@@ -187,8 +204,17 @@ void Simulator<T>::run()
                     // printf( "%d: %f\n", ready[i]->id, ready[i]->priority );
                 }
             }
-			sched->schedule_next( ready, running, abs_time );
 
+			sched->schedule_next( ready, running, abs_time );
+            if( display_sched ) {
+                if( sched->preempted ) {
+                    fprintf( fd, "{%d}\n", static_cast<int>(abs_time) );
+                    fprintf( fd, "\\TaskExecution{%d}{%d}", running->get_id() + 1, static_cast<int>(abs_time) );
+                }
+                if( sched->taskStarted ) {
+                    fprintf( fd, "\\TaskExecution{%d}{%d}", running->get_id() + 1, static_cast<int>(abs_time) );
+                }
+            }
         }
 
 		abs_time += time_slice;
@@ -200,6 +226,9 @@ void Simulator<T>::run()
 		if( running ) {
 		    idle = false;
 			if( running->isFinished() ) {
+                if( display_sched ) {
+                    fprintf( fd, "{%d}\n", static_cast<int>(abs_time) );
+                }
 //				printf( "task %d is finished!\n", running->get_id() );
 				running->update_tardiness( abs_time );
 				running->reset_remaining();
@@ -259,6 +288,13 @@ void Simulator<T>::run()
     if( !ready.empty() ) {
         std::copy( ready.begin(), ready.end(), std::back_inserter( pending ) );
     }
+    if( display_sched ) {
+        fprintf( fd, "{%d}\n", static_cast<int>(abs_time) );
+        fprintf( fd, "\\end{RTGrid}\n" );
+        fprintf( fd, "\\end{figure}\n" );
+        fclose(fd);
+    }
+
 }
 
 template <typename T>
