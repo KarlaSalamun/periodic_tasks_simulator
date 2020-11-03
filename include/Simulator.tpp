@@ -72,7 +72,7 @@ void Simulator<T>::run()
     if( display_sched ) {
         fd = fopen( "../../test_outputs/schedule.tex", "w+" );
         fprintf( fd, "\\begin{figure}[ht]\n" );
-        fprintf( fd, "\\begin{RTGrid}[width=10cm]{%d}{%d}\n", pending.size(), static_cast<int>(finish_time) );
+        fprintf( fd, "\\begin{RTGrid}[width=10cm]{%lu}{%d}\n", pending.size(), static_cast<int>(finish_time) );
         for( auto & element : pending ) {
             fprintf( fd, "\\multido{\\n=0+%d}{%d}{\n", static_cast<int>(element->get_period()), static_cast<int>( finish_time / element->get_period() ) );
             fprintf( fd, "\t\\TaskArrDead{%d}{\\n}{%d}\n", element->get_id() + 1, static_cast<int>(element->get_period()) );
@@ -99,7 +99,7 @@ void Simulator<T>::run()
                 running->skip_factors.push_back( running->get_curr_skip_value() );
                 running->reset_skip_value();
                 if( display_sched ) {
-                    fprintf( fd, "{%d}\n", abs_time );
+                    fprintf( fd, "{%d}\n", static_cast<int>(abs_time) );
                 }
                 pending.push_back( std::move( running ) );
                 running = nullptr;
