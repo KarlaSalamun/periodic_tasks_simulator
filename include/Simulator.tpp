@@ -70,7 +70,7 @@ void Simulator<T>::run()
 
     FILE *fd;
     if( display_sched ) {
-        fd = fopen( "../../test_outputs/schedule.tex", "w+" );
+        fd = fopen( "../schedule.tex", "w+" );
         fprintf( fd, "\\begin{figure}[ht]\n" );
         fprintf( fd, "\\begin{RTGrid}[width=10cm]{%lu}{%d}\n", pending.size(), static_cast<int>(finish_time) );
         for( auto & element : pending ) {
