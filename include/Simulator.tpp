@@ -364,7 +364,8 @@ void Simulator<T>::compute_mean_skip_factor()
     int tasks = 0;
     for( auto & element : pending ) {
         qsort( element->skip_factors.data(), element->skip_factors.size(), sizeof(int), compare_factors );
-        sum += element->get_weight() * element->compute_mean_skip_factor();
+        sum += element->compute_mean_skip_factor();
+        assert( sum != 0 );
         tasks++;
     }
     mean_skip_factor = sum / static_cast<double>( tasks );
@@ -382,7 +383,10 @@ double Simulator<T>::compute_gini_coeff()
             sum += fabs( pending[i]->compute_mean_skip_factor() - pending[j]->compute_mean_skip_factor() );
         }
     }
+    assert(sum == sum);
     compute_mean_skip_factor();
+    assert( mean_skip_factor > 0 );
     sum /= ( 2 * pow(static_cast<double>(pending.size()), 2 ) * mean_skip_factor );
+    assert( sum == sum );
     return sum;
 }

@@ -304,12 +304,13 @@ double Task::compute_mean_skip_factor() {
     }
     double sum = skip_factors[0];
     for( size_t i=1; i<skip_factors.size(); i++ ) {
-       if( skip_factors[i] == 1 ) {
-           if( skip_factors[i-1] == 1 ) {
-               return 0;
-           }
-       }
+//       if( skip_factors[i] == 1 ) {
+//           if( skip_factors[i-1] == 1 ) {
+//               return 0;
+//           }
+//       }
         sum += skip_factors[i];
     }
+    assert( sum == sum );
     return sum / static_cast<double>( skip_factors.size() );
 }
