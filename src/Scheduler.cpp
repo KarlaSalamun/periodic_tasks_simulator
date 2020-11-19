@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cstdio>
+#include <cassert>
 #include "Scheduler.h"
 
 void Scheduler::schedule_next( std::vector<Task *> &ready, Task *&running, double )
@@ -9,18 +10,22 @@ void Scheduler::schedule_next( std::vector<Task *> &ready, Task *&running, doubl
 
 	preempted = false;
 	taskStarted = false;
-	if( running ) {		
+	if( running ) {
+        assert(running->get_phase() == 0);
 		if ( preempt( ready[0], running ) ) {
 //			printf( "task %d is preempted, ", running->get_id() );
 			running->isPreempted = true;
 //			printf( "remaining time %f\n", running->get_remaining() );
 			std::swap( ready[0], running );
+            assert(running->get_phase() == 0);
 			preempted = true;
 		}
 	}
 	else {
 		taskStarted = true;
 		running = std::move( ready[0] );
+        assert(running->get_phase() == 0);
+
 		ready.erase( ready.begin() );
 	}
 

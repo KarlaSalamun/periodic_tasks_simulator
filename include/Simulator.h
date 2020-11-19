@@ -75,18 +75,24 @@ public:
 	double get_time_wasted() {
         return wasted_time;
 	}
+	double get_finish_time() {
+	    return this->finish_time;
+	}
 	void set_display() {
 	    display_sched = true;
 	}
 	void set_filename( std::string filename ) {
 	    this->filename = filename;
 	}
+	double compute_mean_QoS();
 
     double compute_deviation();
 	double compute_skip_fitness();
     void display_info();
     void compute_mean_skip_factor();
     double compute_gini_coeff();
+
+    void update_state( Task *current, std::vector<Task *> ready_tasks );
 
 private:
 	//TODO: clanovi mogu biti unique_ptr
@@ -120,6 +126,7 @@ private:
 		for( auto & element : pending ) {
 			element->initialize_task();
 			element->set_max_instances( floor( tc->get_hyperperiod() / element->get_period() ) );
+			element->skip_factors.clear();
 		}
 	}
 };

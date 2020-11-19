@@ -14,7 +14,7 @@ void TaskCreator::create_test_set( std::vector<Task *> &test_tasks )
         double period = static_cast<double>( 1 + rand() % 5 ); // 1 to 10
         double duration = 0.5 * period;
         double rel_due_date = 0.9 * period;
-        test_tasks[i] = std::move( new Task( phase, 1, period, rel_due_date, i, time_slice, duration ) );
+        test_tasks[i] = std::move( new Task( phase, 1, period, rel_due_date, i, duration ) );
     }
 }
 
@@ -41,8 +41,7 @@ void TaskCreator::load_tasks( std::vector<Task *>  &test_tasks )
 
         fscanf( fd, "%d %lf %lf %lf %d", &id, &phase, &period, &duration, &skip_factor );
         // TODO treba li mi ovdje move
-        test_tasks[i] = new Task( phase, 1, period, period, i, time_slice, duration );
-        test_tasks[i]->set_time_slice( this->time_slice );
+        test_tasks[i] = new Task( phase, 1, period, period, i, duration );
         if( skippable ) {
             test_tasks[i]->set_skip_factor( skip_factor );
         }

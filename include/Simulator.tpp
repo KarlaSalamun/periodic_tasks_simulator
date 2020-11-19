@@ -67,6 +67,7 @@ void Simulator<T>::run()
 	running = nullptr;
 	ready.clear();
 
+	initialize_tasks();
 
     FILE *fd;
     if( display_sched ) {
@@ -81,6 +82,7 @@ void Simulator<T>::run()
     }
 
 	for( auto & element : pending ) {
+	    assert( element->get_phase() == 0 );
 	    element->initialize_task();
 	    element->set_max_instances( finish_time / element->get_period() );
 	}
@@ -90,11 +92,13 @@ void Simulator<T>::run()
 
 		// abort running task if about to miss deadline
         if( running ) {
+            assert(running->get_phase() == 0);
             if( abs_time == running->get_abs_due_date() and
                 std::isgreater( running->get_remaining(), 0  )  ) {
                 wasted_time += running->get_duration() - running->get_remaining();
                 running->inc_instance();
                 running->update_params();
+                running->inc_missed();
                 running->reset_remaining();
                 running->skip_factors.push_back( running->get_curr_skip_value() );
                 running->reset_skip_value();
@@ -109,10 +113,12 @@ void Simulator<T>::run()
 
         it = ready.begin();
         while( it != ready.end() ) {
+            assert( (*it)->get_phase() == 0 );
             if ((*it)->is_next_instance(abs_time)) {
                 (*it)->inc_instance();
                 (*it)->update_params();
                 (*it)->reset_remaining();
+                (*it)->inc_missed();
                 (*it)->skip_factors.push_back( (*it)->get_curr_skip_value() );
                 (*it)->reset_skip_value();
                 pending.push_back(std::move(*it));
@@ -131,6 +137,7 @@ void Simulator<T>::run()
 			
 			if ( (*it)->isReady( abs_time ) ) {
 			    all_tasks++;
+                ( *it )->inc_released();
 				ready.push_back( std::move( *it ) );
 				it = pending.erase( it );
 			}
@@ -178,25 +185,15 @@ void Simulator<T>::run()
 //                std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.pending ) );
                 it = ready.begin();
                 while( it != ready.end() ) {
-                    tctx.pending.clear();
-                    Task *tmp = std::move( *it );
-                    tctx.task = tmp;
-                    tctx.time = abs_time;
+                    double priority;
                     it = ready.erase( it );
-                    std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.pending ) );
-                    heuristic->execute( &tctx );
-                    assert( tctx.task->get_priority() == tctx.task->get_priority() );
-                    tctx.processed.push_back( std::move( tmp ) );
+                    update_state( *it, ready );
+                    heuristic->execute( &priority );
+                    (*it)->set_priority( priority );
+                    ready.push_back( *it );
+                    it++;
                 }
-                std::copy( tctx.processed.begin(), tctx.processed.end(), std::back_inserter( ready ) );
-
-                /*
-                for( auto & element : ready ) {         // TODO: staviti pointer na vektore u tctx
-                    tctx.task = element;
-                    heuristic->execute( &tctx );
-                    element->set_priority( tctx.task->get_priority() );
-                }
-                 */
+                assert( ready[0]->get_phase() == 0 );
 			}
             else { // EDF scheduling
                 for( size_t i=0; i<ready.size(); i++ ) {
@@ -205,7 +202,17 @@ void Simulator<T>::run()
                 }
             }
 
+            assert( ready.size() <= 6 );
+
+            if(running) {
+                assert(running->get_phase() == 0);
+            }
+
+            assert( ready[0]->get_phase() == 0 );
+            assert( ready.size() <= 6  && ready.size() != 0);
 			sched->schedule_next( ready, running, abs_time );
+            assert( ready[0]->get_phase() == 0 );
+            assert(running->get_phase() == 0);
             if( display_sched ) {
                 if( sched->preempted ) {
                     fprintf( fd, "{%d}\n", static_cast<int>(abs_time) );
@@ -224,6 +231,7 @@ void Simulator<T>::run()
 //        printf( "\ntime: %f\n\n", abs_time );
 
 		if( running ) {
+            assert(running->get_phase() == 0);
 		    idle = false;
 			if( running->isFinished() ) {
                 if( display_sched ) {
@@ -232,6 +240,7 @@ void Simulator<T>::run()
 //				printf( "task %d is finished!\n", running->get_id() );
 				running->update_tardiness( abs_time );
 				running->reset_remaining();
+				running->inc_completed();
 				completed++;
 				running->inc_instance();
 				running->update_params();
@@ -267,6 +276,7 @@ void Simulator<T>::run()
         total_tardiness += element->get_tardiness();
         if( element->get_arrival_time() < abs_time ) {
             missed++;
+            element->inc_missed();
             element->skip_factors.push_back( element->get_curr_skip_value() );
         }
 	}
@@ -276,6 +286,7 @@ void Simulator<T>::run()
         if( abs_time == running->get_abs_due_date() and
             std::isgreater( running->get_remaining(), 0  )  ) {
             running->skip_factors.push_back( running->get_curr_skip_value() );
+            running->inc_missed();
             missed++;
         }
 	}
@@ -389,4 +400,33 @@ double Simulator<T>::compute_gini_coeff()
     sum /= ( 2 * pow(static_cast<double>(pending.size()), 2 ) * mean_skip_factor );
     assert( sum == sum );
     return sum;
+}
+
+template <typename T>
+void Simulator<T>::update_state( Task *current, std::vector<Task *> ready_tasks ) {
+    double due_date = static_cast<double>(current->get_abs_due_date());
+    double remaining_no = static_cast<double>(ready_tasks.size());
+    double spr = 0;
+    double sd = 0;
+    for( auto & element : ready_tasks ) {
+        spr += static_cast<double>(element->get_duration());
+        sd += static_cast<double>(element->get_abs_due_date());
+    }
+    double pt = static_cast<double>(current->get_duration());
+    double sl = static_cast<double>(std::max( current->get_abs_due_date() - current->get_duration() - current->get_time_started(), 0));
+    double w = static_cast<double>(current->get_weight());
+    double rt = static_cast<double>(current->get_remaining());
+    double skip = static_cast<double>(current->get_curr_skip_value());
+    double QoS = static_cast<double>(current->get_completed()) / static_cast<double>(current->get_released());
+
+    heuristic->setTerminalValue( "dd", &due_date);
+    heuristic->setTerminalValue( "nr", &remaining_no );
+    heuristic->setTerminalValue( "spr", &spr );
+    heuristic->setTerminalValue( "pt", &pt );
+    heuristic->setTerminalValue( "sd", &sd );
+    heuristic->setTerminalValue( "sl", &sl );
+    heuristic->setTerminalValue( "w", &w );
+    heuristic->setTerminalValue( "rt", &rt );
+    heuristic->setTerminalValue( "skip", &skip );
+    heuristic->setTerminalValue( "QoS", &QoS );
 }

@@ -7,7 +7,7 @@
 #include <cassert>
 #include "Task.h"
 
-double Task::compute_tardiness( double time )
+int Task::compute_tardiness( int time )
 {
 	return time > abs_due_date ? time - abs_due_date : 0;
 }
@@ -28,7 +28,7 @@ void Task::set_abs_dd()
 	abs_due_date = phase + ( instance - 1 ) * period + rel_due_date;
 } 
 
-bool Task::isReady( double time ) 
+bool Task::isReady( int time )
 {
     if( fabs( time - arrival_time ) < 0.001 ) {
         return true;
@@ -41,7 +41,7 @@ bool Task::isFinished()
 	return remaining <= 1;
 }
 
-void Task::update_tardiness( double time )
+void Task::update_tardiness( int time )
 {
 	if( time > abs_due_date ) {
 		tardiness += time - abs_due_date;
@@ -78,7 +78,7 @@ void Task::update_remaining()
 //     this->instance = instance;
 // }
 
-void Task::set_arrival_time( double arrival_time )
+void Task::set_arrival_time( int arrival_time )
 {
     this->arrival_time = arrival_time;
 }
@@ -88,12 +88,12 @@ void Task::set_priority( double priority )
 	this->priority = priority;
 }
 
-void Task::set_tardiness( double tard )
+void Task::set_tardiness( int tard )
 {
 	this->tardiness = tard;
 }
 
-void Task::set_time_started(double time)
+void Task::set_time_started(int time)
 {
     this->time_started = time;
 }
@@ -108,17 +108,12 @@ void Task::set_skip_factor(int factor)
     this->skip_factor = factor;
 }
 
-void Task::set_time_slice( double timeslice )
-{
-    this->time_slice = timeslice;
-}
-
 void Task::set_curr_skip_value(int value)
 {
     this->current_skip_value = value;
 }
 
-void Task::set_duration( double duration )
+void Task::set_duration( int duration )
 {
     this->duration = duration;
 }
@@ -139,32 +134,32 @@ int Task::get_id()
 	return this->id;
 }
 
-double Task::get_phase()
+int Task::get_phase()
 {
 	return this->phase;
 }
 
-double Task::get_period() const
+int Task::get_period() const
 {
 	return this->period;
 }
 
-double Task::get_duration()
+int Task::get_duration()
 {
 	return this->duration;
 }
 
-double Task::get_abs_due_date() const
+int Task::get_abs_due_date() const
 {
 	return this->abs_due_date;
 }
 
-double Task::get_remaining()
+int Task::get_remaining()
 {
 	return this->remaining;
 }
 
-double Task::get_tardiness()
+int Task::get_tardiness()
 {
 	return this->tardiness;
 }
@@ -184,7 +179,7 @@ double Task::get_weight()
     return this->weight;
 }
 
-double Task::get_time_started()
+int Task::get_time_started()
 {
     return this->time_started;
 }
@@ -199,13 +194,14 @@ int Task::get_skip_factor()
     return this->skip_factor;
 }
 
-double Task::get_arrival_time() const
+int Task::get_arrival_time() const
 {
     return this->arrival_time;
 }
 
 int Task::get_curr_skip_value()
 {
+    assert( this->current_skip_value >= 0 );
     return this->current_skip_value;
 }
 
@@ -229,6 +225,8 @@ void Task::initialize_task()
 	tardiness = 0;
 	skip_factors.clear();
 	weight = 1;
+    completed = 0;
+    released = 0;
 }
 
 bool Task::is_missed( double time )
@@ -236,7 +234,7 @@ bool Task::is_missed( double time )
 	return std::islessequal( phase + (instance-1) * period, time );
 }
 
-bool Task::is_next_instance( double time )
+bool Task::is_next_instance( int time )
 {
     if( fabs( phase + instance * period - time ) < 0.001 ) {
         return true;
@@ -313,4 +311,24 @@ double Task::compute_mean_skip_factor() {
     }
     assert( sum == sum );
     return sum / static_cast<double>( skip_factors.size() );
+}
+
+void Task::inc_missed() {
+    this->missed++;
+}
+
+int Task::get_released() {
+    return this->released;
+}
+
+int Task::get_completed() {
+    return this->completed;
+}
+
+void Task::inc_released() {
+    this->released++;
+}
+
+void Task::inc_completed() {
+    this->completed++;
 }
