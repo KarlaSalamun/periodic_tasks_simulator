@@ -182,7 +182,6 @@ void Simulator<T>::run()
 			    std::vector<Task *> tmp_processed;
                 tctx.processed.clear();
 
-//                std::copy( ready.begin(), ready.end(), std::back_inserter( tctx.pending ) );
                 it = ready.begin();
                 while( it != ready.end() ) {
                     double priority;

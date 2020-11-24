@@ -19,7 +19,7 @@ public:
 
 	virtual ~UunifastCreator() = default;
 
-	virtual void create_test_set( std::vector<Task *> &test_tasks ) override;
+	void create_test_set( std::vector<Task *> &test_tasks ) override;
 	void set_overload( double overload ) {
 	    this->overload_factor = overload;
 	}
